@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('生产实习申请')" />
+</head>
+<body class="gray-bg">
+<div class="container-div">
+	<div class="row">
+		<div class="col-sm-12 search-collapse">
+			<form id="role-form">
+				<div class="select-list">
+					<ul>
+						<li>
+							编号：<input type="text" name="productionId"/>
+						</li>
+						<li>
+							名称：<input type="text" name="productionName"/>
+						</li>
+						<li>
+							单位名称：<input type="text" name="productionCompany"/>
+						</li>
+						<li>
+							<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+							<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+						</li>
+					</ul>
+				</div>
+			</form>
+		</div>
+
+		<div class="col-sm-12 select-table table-striped">
+			<table id="bootstrap-table"></table>
+		</div>
+	</div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+	var addFlag = [[${@permission.hasPermi('system:prodapply:add')}]];
+	var prefix = ctx + "sau/prodapply";
+
+
+	$(function() {
+		var options = {
+			url: ctx + "sau/production/selectProduction",
+			createUrl: prefix + "/addProdApply",
+			sortName: "productionId",
+			modalName: "疫苗信息",
+			columns: [
+				{
+					field: 'productionId',
+					title: '编号'
+				},
+				{
+					field: 'productionName',
+					title: '名称'
+				},
+				{
+					field: 'productionRequire',
+					cellStyle: formatTableUnit,
+					formatter: paramsMatter,
+					title: '申请要求'
+				},
+				{
+					field: 'productionBegin',
+					title: '开始时间'
+				},
+				{
+					field: 'productionEnd',
+					title: '结束时间'
+				},
+				{
+					field: 'productionOver',
+					title: '申请截至时间'
+				},
+				{
+					field: 'productionCompany',
+					cellStyle: formatTableUnit,
+					formatter: paramsMatter,
+					title: '疫苗单位名称'
+				},
+				{
+					field: 'productionIntro',
+					cellStyle: formatTableUnit,
+					formatter: paramsMatter,
+					title: '疫苗单位简介'
+				},
+				{
+					title: '操作',
+					align: 'center',
+					formatter: function(value, row, index) {
+						var actions = [];
+						actions.push('<a class="btn btn-success btn-xs ' + addFlag + '" href="javascript:void(0)" onclick="addCourse(\'' + row.productionId+ '\')"><i class="fa fa-plus"></i>申请</a> ');
+						return actions.join('');
+					}
+				}]
+		};
+		$.table.init(options);
+	});
+
+	// 申请顶岗实习
+	function addCourse(id) {
+		table.set();
+		$.modal.confirm("确定申请本次" + table.options.modalName + "吗？", function() {
+			var url = $.common.isEmpty(id) ? table.options.createUrl : table.options.createUrl.replace("{id}", id);
+			if(table.options.type == table_type.bootstrapTreeTable) {
+				$.operate.get(url);
+			} else {
+				var data = { "ids": id };
+				$.operate.submit(url, "post", "json", data);
+			}
+		});
+	}
+
+	function paramsMatter(value, row, index) {
+		var span = document.createElement("span");
+		span.setAttribute("title", (typeof(value) == "undefined") ? "-" : value);
+		span.innerHTML = (typeof(value) == "undefined") ? "-" : value;
+		return span.outerHTML;
+	}
+	//td宽度以及内容超过宽度隐藏
+	function formatTableUnit(value, row, index) {
+		return {
+			css: {
+				"white-space": "nowrap",
+				"text-overflow": "ellipsis",
+				"overflow": "hidden",
+				"max-width": "60px"
+			}
+		}
+	}
+
+
+</script>
+</body>
+</html>

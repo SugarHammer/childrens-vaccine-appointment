@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('已选课程')" />
+</head>
+<body class="gray-bg">
+<div class="container-div">
+	<div class="row">
+		<div class="col-sm-12 search-collapse">
+			<form id="role-form">
+				<div class="select-list">
+					<ul>
+						<li>
+							课程号：<input type="text" name="courseId"/>
+						</li>
+						<li>
+							课程名称：<input type="text" name="courseName"/>
+						</li>
+						<li>
+							任课教师姓名：<input type="text" name="teacherName"/>
+						</li>
+						<li>
+							<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+							<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+						</li>
+					</ul>
+				</div>
+			</form>
+		</div>
+
+		<div class="btn-group-sm" id="toolbar" role="group">
+
+		</div>
+
+		<div class="col-sm-12 select-table table-striped">
+			<table id="bootstrap-table"></table>
+		</div>
+	</div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+	var removeFlag = [[${@permission.hasPermi('system:selected:remove')}]];
+	var prefix = ctx + "project/stuandcou";
+
+	$(function() {
+		var options = {
+			url: prefix + "/selectCourseById",
+			removeUrl: prefix + "/deleteByCourseId",
+			sortName: "courseId",
+			modalName: "课程",
+			columns: [
+				{
+					field: 'courseId',
+					title: '课程号',
+					sortable: true
+				},
+				{
+					field: 'courseName',
+					title: '课程名称'
+				},
+				{
+					field: 'teacherId',
+					title: '任课教师号'
+				},
+				{
+					field: 'teacherName',
+					title: '任课教师姓名',
+				},
+				{
+					field: 'courseTime',
+					title: '学时',
+					sortable: true
+				},
+				{
+					field: 'coursePoint',
+					title: '学分',
+					sortable: true
+				},
+				{
+					title: '操作',
+					align: 'center',
+					formatter: function(value, row, index) {
+						var actions = [];
+						actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="remove(\'' + row.courseId + '\')"><i class="fa fa-remove"></i>退选</a> ');
+						return actions.join('');
+					}
+				}]
+		};
+		$.table.init(options);
+	});
+
+	function remove(id) {
+		table.set();
+		$.modal.confirm("确定退选这门" + table.options.modalName + "吗？", function() {
+			var url = $.common.isEmpty(id) ? table.options.removeUrl : table.options.removeUrl.replace("{id}", id);
+			if(table.options.type == table_type.bootstrapTreeTable) {
+				$.operate.get(url);
+			} else {
+				var data = { "ids": id };
+				$.operate.submit(url, "post", "json", data);
+			}
+		});
+	}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('录入成绩')" />
+	<th:block th:include="include :: ztree-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal m" id="form-role-edit" th:object="${stuandcou}">
+			<input id="curriculaId" name="curriculaId" type="hidden" th:field="*{curriculaId}"/>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">平时成绩：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="score" id="pacificScore" th:field="*{pacificScore}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">考试成绩：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="examScore" id="score" th:field="*{examScore}" required>
+				</div>
+			</div>
+		</form>
+	</div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: ztree-js" />
+	<th:block th:include="include :: datetimepicker-js" />
+	<script type="text/javascript">
+	     $(function() {
+
+		});
+
+		function edit() {
+			var curriculaId = $("input[name='curriculaId']").val();
+			var pacificScore = $("input[name='pacificScore']").val();
+			var examScore = $("input[name='examScore']").val();
+			$.ajax({
+				cache : true,
+				type : "POST",
+				url : ctx + "project/grade/addGrade",
+				data : {
+					"curriculaId": curriculaId,
+					"pacificScore": pacificScore,
+					"examScore": examScore
+				},
+				async : false,
+				error : function(request) {
+					$.modal.alertError("系统错误");
+				},
+				success : function(data) {
+					$.operate.successCallback(data);
+				}
+			});
+		}
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	edit();
+	        }
+	    }
+	</script>
+</body>
+</html>

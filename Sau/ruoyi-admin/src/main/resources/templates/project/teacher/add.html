@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增职工')" />
+	<th:block th:include="include :: ztree-css" />
+	<th:block th:include="include :: select2-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal m" id="form-role-add">
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">职工姓名：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="teacherName" id="teacherName" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label"><span style="color: red; ">*</span>所在单位号：</label>
+				<div class="col-sm-8">
+					<div class="input-group">
+						<input name="treeId" id="treeId" type="hidden">
+						<input name="treeName" onclick="selectDeptTree()" id="treeName" type="text" placeholder="请选择所在单位" class="form-control" required>
+						<span class="input-group-addon"><i class="fa fa-search"></i></span>
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label"><span style="color: red; ">*</span>登录账号：</label>
+				<div class="col-sm-8">
+					<input id="loginName" name="loginName" placeholder="请输入登录账号" class="form-control" type="text" maxlength="30" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label"><span style="color: red; ">*</span>登录密码：</label>
+				<div class="col-sm-8">
+					<input name="password" placeholder="请输入登录密码" class="form-control" type="password" th:value="${@config.getKey('sys.user.initPassword')}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">技术专长：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="teacherTechnical" id="teacherTechnical" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">出生日期：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="teacherBirthday" id="teacherBirthday" required placeholder="年-月-日">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">职工性别：</label>
+				<div class="col-sm-8">
+					<select class="form-control" name="teacherSex" id="teacherSex" required>
+						<option value="0">男</option>
+						<option value="1">女</option>
+						<option value="2">未知</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">职工职称：</label>
+				<div class="col-xs-8">
+					<select id="post" class="form-control" required>
+						<option th:each="post:${posts}" th:value="${post.postId}" th:text="${post.postName}" th:disabled="${post.status == '1'}"></option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">用户角色：</label>
+				<div class="col-xs-8">
+					<label th:each="role:${roles}" class="check-box">
+						<input name="role" type="checkbox" th:value="${role.roleId}" th:text="${role.roleName}" th:disabled="${role.status == '1'}">
+					</label>
+				</div>
+			</div>
+		</form>
+	</div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: ztree-js" />
+	<th:block th:include="include :: datetimepicker-js" />
+	<th:block th:include="include :: select2-js" />
+	<script type="text/javascript">
+		var prefix = ctx + "system/user";
+	    $(function() {
+			$("#teacherBirthday").datetimepicker({
+				format: "yyyy-mm-dd",
+				minView: "month",
+				autoclose: true
+			});
+		});
+
+		$("#form-user-add").validate({
+			onkeyup: false,
+			rules:{
+				loginName:{
+					minlength: 2,
+					maxlength: 20,
+					remote: {
+						url: prefix + "/checkLoginNameUnique",
+						type: "post",
+						dataType: "json",
+						data: {
+							"loginName": function() {
+								return $.common.trim($("#loginName").val());
+							}
+						},
+						dataFilter: function(data, type) {
+							return $.validate.unique(data);
+						}
+					}
+				},
+				password:{
+					minlength: 5,
+					maxlength: 20
+				},
+			},
+			messages: {
+				"loginName": {
+					remote: "用户已经存在"
+				}
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	add();
+	        }
+	    }
+	
+		function add() {
+			var teacherName = $("input[name='teacherName']").val();
+			var treeId = $("input[name='treeId']").val();
+			var loginName = $("input[name='loginName']").val();
+			var password = $("input[name='password']").val();
+			var teacherTechnical = $("input[name='teacherTechnical']").val();
+			var teacherBirthday = $("input[name='teacherBirthday']").val();
+			var teacherSex = $("#teacherSex").val();
+			var roleIds = $.form.selectCheckeds("role");
+			var postIds = $.form.selectSelects("post");
+			$.ajax({
+				cache : true,
+				type : "POST",
+				url : ctx + "project/teacher/addTeacher",
+				data : {
+					"teacherName": teacherName,
+					"treeId": treeId,
+					"loginName": loginName,
+					"password": password,
+					"teacherTechnical": teacherTechnical,
+					"teacherBirthday": teacherBirthday,
+					"teacherSex": teacherSex,
+					"roleIds": roleIds,
+					"postIds": postIds
+				},
+				async : false,
+				error : function(request) {
+					$.modal.alertError("系统错误");
+				},
+				success : function(data) {
+					$.operate.successCallback(data);
+				}
+			});
+		}
+
+		/*用户管理-新增-选择部门树*/
+		function selectDeptTree() {
+			var treeId = $("#treeId").val();
+			var deptId = $.common.isEmpty(treeId) ? "100" : $("#treeId").val();
+			var url = ctx + "system/dept/selectDeptTree/" + deptId;
+			var options = {
+				title: '选择院系',
+				width: "380",
+				url: url,
+				callBack: doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit(index, layero){
+			var tree = layero.find("iframe")[0].contentWindow.$._tree;
+			if ($.tree.notAllowParents(tree)) {
+				var body = layer.getChildFrame('body', index);
+				$("#treeId").val(body.find('#treeId').val());
+				$("#treeName").val(body.find('#treeName').val());
+				layer.close(index);
+			}
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.sau.mapper.WorkWeekMapper">
+    <insert id="addWorkly" >
+        insert into sau_work_weekly_msg
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="stuWorkId != null and stuWorkId != 0">
+                stu_work_id,
+            </if>
+            <if test="worklyCategory != null and worklyCategory != ''">
+                workly_category,
+            </if>
+            <if test="worklyOver != null and worklyOver != ''">
+                workly_over,
+            </if>
+            <if test="worklyMain != null and worklyMain != ''">
+                workly_main,
+            </if>
+            <if test="worklyScore != null and worklyScore != ''">
+                workly_score,
+            </if>
+            <if test="worklyRemark != null and worklyRemark != ''">
+                workly_remark,
+            </if>
+            state
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="stuWorkId != null and stuWorkId != 0">
+                #{stuWorkId},
+            </if>
+            <if test="worklyCategory != null and worklyCategory != ''">
+                #{worklyCategory},
+            </if>
+            <if test="worklyOver != null and worklyOver != ''">
+                #{worklyOver},
+            </if>
+            <if test="worklyMain != null and worklyMain != ''">
+                #{worklyMain},
+            </if>
+            <if test="worklyScore != null and worklyScore != ''">
+                #{worklyScore},
+            </if>
+            <if test="worklyRemark != null and worklyRemark != ''">
+                #{worklyRemark},
+            </if>
+            1
+        </trim>
+    </insert>
+
+    <update id="deleteWeekByStuWorkId">
+        update sau_work_weekly_msg
+        set state = 1
+        where stu_work_id = #{stuWorkId}
+    </update>
+
+    <select id="selectWeekBystuId" parameterType="long" resultType="java.util.Map">
+        select
+        a.work_id as "workId",
+        b.work_weekly as "workWeekly",
+        c.workly_id as "worklyId",
+        c.workly_category as "worklyCategory",
+        c.workly_over as "worklyOver",
+        c.workly_main as "worklyMain",
+        c.workly_score as "worklyScore",
+        c.workly_act_score as "worklyActScore",
+        c.workly_remark as "worklyRemark"
+        from sau_student_work_msg a
+        left join sau_work_info_msg b on a.work_id = b.work_id
+        left join sau_work_weekly_msg c on a.stu_work_id = c.stu_work_id
+        <where>
+            a.student_id = #{stuId} and a.state = 1 and b.state = 1 and c.state = 1
+            <if test="workId != null and workId != 0">
+                and a.work_id = #{workId}
+            </if>
+            <if test="worklyId != null and worklyId != 0">
+                and c.workly_id = #{worklyId}
+            </if>
+            <if test="worklyCategory != null and worklyCategory != ''">
+                and c.workly_category like concat ('%',#{worklyCategory},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="selectWeekById" parameterType="long" resultType="com.ruoyi.sau.domain.WorkWeek">
+        select
+        workly_id as "worklyId",
+        stu_work_id as "stuWorkId",
+        workly_category as "worklyCategory",
+        workly_over as "worklyOver",
+        workly_main as "worklyMain",
+        workly_score as "worklyScore",
+        workly_act_score as "worklyActScore",
+        workly_remark as "worklyRemark"
+        from sau_work_weekly_msg
+        where state = 1 and workly_id = #{worklyId}
+    </select>
+
+    <update id="updateWeekly" parameterType="map">
+        update sau_work_weekly_msg
+        set workly_main = #{worklyMain}
+        where workly_id = #{worklyId}
+    </update>
+
+    <select id="selectWeeks" resultType="map">
+        select
+        a.workly_id as "worklyId",
+        a.workly_category as "worklyCategory",
+        a.workly_over as "worklyOver",
+        a.workly_main as "worklyMain",
+        a.workly_score as "worklyScore",
+        a.workly_act_score as "worklyActScore",
+        a.workly_remark as "worklyRemark",
+        b.work_id as "workId",
+        c.student_id as "studentId",
+        c.student_name as "studentName"
+        from sau_work_weekly_msg a
+        left join sau_student_work_msg b on a.stu_work_id = b.stu_work_id
+        left join sau_student_info_msg c on b.student_id = c.student_id
+        <where>
+            a.state = 1 and b.state = 1 and c.state = 1
+            <if test="workId != null and workId != 0">
+                and b.work_id = #{workId}
+            </if>
+            <if test="studentId != null and studentId != 0">
+                and c.student_id = #{studentId}
+            </if>
+            <if test="worklyCategory != null and worklyCategory != ''">
+                and a.workly_category  like concat('%',#{worklyCategory},'%')
+            </if>
+        </where>
+    </select>
+
+    <update id="updateWeeklyByTea" parameterType="map">
+        update sau_work_weekly_msg
+        <set>
+            <if test="worklyActScore != null and worklyActScore != ''">
+                workly_act_score = #{worklyActScore},
+            </if>
+            <if test="worklyRemark != null and worklyRemark != ''">
+                workly_remark = #{worklyRemark},
+            </if>
+        </set>
+        where workly_id = #{worklyId}
+    </update>
+
+</mapper>

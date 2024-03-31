@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('帖子详情')" />
+	<th:block th:include="include :: ztree-css" />
+</head>
+<body class="white-bg">
+		<div class="page_left col-lg-9 col-md-9 col-sm-12 col-xs-12" th:object="${talk}">
+			<h3>
+				<p id="talkCenter" name="talkCenter" th:text="*{talkCenter}"></p>
+			</h3>
+			<div class="form-group comment_context_section">
+				<textarea class="form-control"  name="talkContent" id="talkContent" type="text" rows="20" th:field="*{talkContent}"
+						   readonly></textarea>
+			</div>
+			<div class="comment_count">
+				<h3>
+					&nbsp;回复
+				</h3>
+			</div>
+			<div th:each="commentDto : ${commentDtos}">
+				<div class="media">
+					<div class="media-body">
+						<span class="media-heading question_text" th:text="${commentDto.userName}"></span>
+						<br>
+						<span th:text="${commentDto.commentContent}"></span>
+					</div>
+				</div>
+				<!--问题评论的操作-->
+				<div class="comment_operating" style="position: relative;">
+					<span class="glyphicon glyphicon-thumbs-up btn oper-btn"></span>
+					<span class="glyphicon glyphicon-comment btn oper-btn"
+						  th:id="'sub_comment_btn-'+${commentDto.commentId}" th:data-id="${commentDto.commentId}"
+						  onclick="subComment(this)">
+                    </span>
+					<span class="question_text" th:text="${commentDto.commentCount}+'条回复'"></span>
+					<span class="question_text" style="position:absolute;right:0px;" th:text="${#dates.format(commentDto.commentTime, 'yyyy-MM-dd HH:mm:ss')}">评论时间</span>
+				</div>
+				<!--子评论的内容-->
+				<div th:id="'comment-'+${commentDto.commentId}" class="collapse sub_comments">
+					<!--提交子评论-->
+					<div>
+						<input class="form-control" placeholder="请输入评论的内容" th:id="${'input-'+commentDto.commentId}">
+						<button type="button" class="btn btn-success btn-publish" th:data-id="${commentDto.commentId}" onclick="submit_comment_comment(this)">评论</button>
+					</div>
+				</div>
+
+				<hr class="comment_cut_line">
+			</div>
+			<!--提交问题评论-->
+			<h3 class="comment_commit">
+				&nbsp;提交评论
+			</h3>
+
+			<input type="hidden" id="question_parent_id" th:field="*{talkId}">
+			<div class="form-group comment_context_section" id="comment_frame">
+				<textarea class="form-control" rows="7" id="question_comment_content" placeholder="输入评论内容"></textarea>
+			</div>
+			<button type="button" class="btn btn-success btn-publish" onclick="submit_question_comment()">提交</button>
+		</div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: ztree-js" />
+	<th:block th:include="include :: datetimepicker-js" />
+	<script type="text/javascript">
+	     $(function() {
+
+		});
+
+		function submitHandler() {
+			//获取窗口索引
+			var index = parent.layer.getFrameIndex(window.name);
+			parent.layer.close(index);
+	    }
+
+		 function subComment(e) {
+			 const id = e.getAttribute("data-id");//获取评论id
+			 $('#sub_comment_btn-' + id).toggleClass("active");
+			 var subCommentContainer = $('#comment-' + id);
+			 subCommentContainer.toggleClass("in");
+			 if (subCommentContainer.hasClass("in") && subCommentContainer.children().length === 1) {
+				 $.getJSON("/sau/talk/comment/" + id, function (data) {
+					 $.each(data, function (index, comment) {
+						 const mediaBodyElement = $("<div/>", {
+							 "class": "media-body"
+						 }).append($("<span/>", {
+							 "class": "media-heading question_text",
+							 "html": comment.userName
+						 })).append($("<br/>")).append($("<span/>", {
+							 "html": comment.commentContent
+						 }));
+
+						 const mediaElement = $("<div/>", {
+							 "class": "media"
+						 }).append(mediaBodyElement);
+						 const operatingElement = $("<div/>", {
+						     "class": "comment_operating",
+							 "style": "position: relative"
+						 }).append($("<span/>", {
+						     "class": "glyphicon glyphicon-thumbs-up btn"
+						 })).append($("<span/>", {
+							 "class": "glyphicon glyphicon-comment btn oper-btn",
+							 "th:id": 'sub_comment_btn-'+ comment.commentId,
+							 "th:data-id": comment.commentId,
+							 "onclick": "subComment(this)"
+						 })).append($("<span/>", {
+							 "class": "question_text",
+							 "html" : comment.commentCount + '条回复'
+						 })).append($("<span/>", {
+						     "class": "question_text",
+							 "style": "position:absolute;right:0px",
+						     "html": comment.commentTime
+						 }));
+
+						 // const help = $("<div/>", {
+						 // }).append($("<input/>", {
+							//  "class": "form-control",
+							//  "placeholder": '请输入评论的内容',
+							//  "th:id": 'input-' + comment.commentId
+						 // })).append($("<button/>", {
+							//  "class": "btn btn-success btn-publish",
+							//  "type": "button",
+							//  "th:data-id": comment.commentId,
+							//  "onclick": submit_comment_comment(this),
+							//  "html": 评论
+						 // }));
+						 //
+						 // const helper = $("<div/>", {
+							//  "class": "collapse sub_comments",
+							//  "th:id": 'comment-'+ comment.commentId
+						 // }).append(help);
+
+						 const lineElement = $("<hr/>", {
+							 "class": "comment_cut_line"
+						 });
+						 const commentElement = $("<div/>")
+								 .append(mediaElement)
+								 .append(operatingElement)
+								 // .append(helper)
+								 .append(lineElement);
+
+						 subCommentContainer.prepend(commentElement);
+					 });
+				 });
+			 }
+		 }
+
+		 /**
+		  * 根据传递的类型提交评论
+		  * @param parent_id
+		  * @param type
+		  * @param content
+		  */
+		 function submit_comment_by_type(parent_id, content) {
+			 if (!content) {
+				 alert("不能输入空的内容哦~");
+				 return;
+			 }
+			 $.ajax({
+				 cache: true,
+				 type: "POST",
+				 url: ctx + "sau/talk/insertComment",
+				 data: {
+					 "parentId": parent_id,
+					 "content": content
+				 },
+				 async: false,
+				 error: function (request) {
+					 $.modal.alertError("系统错误");
+				 },
+				 success: function (data) {
+					 $.operate.successCallback(data);
+				 }
+			 });
+		 }
+
+		 /**
+		  * 提交问题的回复
+		  */
+		 function submit_question_comment() {
+			 const id = $("#question_parent_id").val();
+			 const content = $("#question_comment_content").val();
+			 submit_comment_by_type(id, content);
+		 }
+
+		 /**
+		  * 提交评论的回复
+		  * @param e
+		  */
+		 function submit_comment_comment(e) {
+			 const id = e.getAttribute("data-id");//获得回复的id
+			 const content = $("#input-" + id).val();//根据id获得评论内容
+			 submit_comment_by_type(id, content);
+		 }
+
+	</script>
+</body>
+</html>

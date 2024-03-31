@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改职工信息')" />
+	<th:block th:include="include :: ztree-css" />
+	<th:block th:include="include :: select2-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal m" id="form-role-edit" th:object="${teacher}">
+			<input id="roleId" name="studentId" type="hidden" th:field="*{teacherId}"/>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">职工名称：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="teacherName" id="teacherName" th:field="*{teacherName}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">技术专长：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="teacherTechnical" id="teacherTechnical" th:field="*{teacherTechnical}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">所在单位号：</label>
+				<div class="col-sm-8">
+					<select class="form-control" name="departmentId" id="departmentId" th:with="type=${@dept.getDepartmentId()}" th:field="*{departmentId}" required>
+						<option th:each="dept : ${type}" th:text="${dept.deptName}" th:value="${dept.deptId}"></option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">出生日期：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="teacherBirthday" id="teacherBirthday" th:field="*{teacherBirthday}" required placeholder="年-月-日">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">职工性别：</label>
+				<div class="col-sm-8">
+					<select class="form-control" name="teacherSex" id="teacherSex" th:field="*{teacherSex}" required>
+						<option value="0">男</option>
+						<option value="1">女</option>
+						<option value="2">未知</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">职工职称：</label>
+				<div class="col-xs-8">
+					<select id="post" class="form-control" th:field="*{teacherTitle}" required>
+						<option th:each="post:${posts}" th:value="${post.postId}" th:text="${post.postName}" th:disabled="${post.status == '1'}"></option>
+					</select>
+				</div>
+			</div>
+		</form>
+	</div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: ztree-js" />
+	<th:block th:include="include :: datetimepicker-js" />
+	<th:block th:include="include :: select2-js" />
+	<script type="text/javascript">
+	     $(function() {
+			 $("#studentBirthday").datetimepicker({
+				 format: "yyyy-mm-dd",
+				 minView: "month",
+				 autoclose: true
+			 });
+		});
+
+
+		function edit() {
+			var teacherId = $("input[name='teacherId']").val();
+			var teacherName = $("input[name='teacherName']").val();
+			var teacherTechnical = $("input[name='teacherTechnical']").val();
+			var teacherBirthday = $("input[name='teacherBirthday']").val();
+			var teacherSex = $("#teacherSex").val();
+			var departmentId = $("#departmentId").val();
+			var teacherTitle = $.form.selectSelects("post");
+			$.ajax({
+				cache : true,
+				type : "POST",
+				url : ctx + "project/teacher/updateTeacher",
+				data : {
+					"teacherId": teacherId,
+					"teacherName": teacherName,
+					"teacherTechnical": teacherTechnical,
+					"teacherBirthday": teacherBirthday,
+					"teacherSex": teacherSex,
+					"departmentId": departmentId,
+					"teacherTitle": teacherTitle
+				},
+				async : false,
+				error : function(request) {
+					$.modal.alertError("系统错误");
+				},
+				success : function(data) {
+					$.operate.successCallback(data);
+				}
+			});
+		}
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	edit();
+	        }
+	    }
+
+		 /*用户管理-新增-选择部门树*/
+		 function selectDeptTree() {
+			 var treeId = $("#treeId").val();
+			 var deptId = $.common.isEmpty(treeId) ? "100" : $("#treeId").val();
+			 var url = ctx + "system/dept/selectDeptTree/" + deptId;
+			 var options = {
+				 title: '选择院系',
+				 width: "380",
+				 url: url,
+				 callBack: doSubmit
+			 };
+			 $.modal.openOptions(options);
+		 }
+		 function doSubmit(index, layero){
+			 var tree = layero.find("iframe")[0].contentWindow.$._tree;
+			 if ($.tree.notAllowParents(tree)) {
+				 var body = layer.getChildFrame('body', index);
+				 $("#treeId").val(body.find('#treeId').val());
+				 $("#treeName").val(body.find('#treeName').val());
+				 layer.close(index);
+			 }
+		 }
+	</script>
+</body>
+</html>

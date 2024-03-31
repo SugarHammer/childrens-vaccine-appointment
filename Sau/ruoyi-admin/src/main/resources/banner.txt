@@ -1,0 +1,7 @@
+Application Version: ${ruoyi.version}
+Spring Boot Version: ${spring-boot.version}
+    /////////////////////////////////
+   //            围观客            //
+  //           weiguanke         //
+ //         www.weiguanke.cn    //
+/////////////////////////////////

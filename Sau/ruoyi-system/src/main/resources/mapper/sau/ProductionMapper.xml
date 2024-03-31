@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.sau.mapper.ProductionMapper">
+
+    <insert id="addProduction" parameterType="com.ruoyi.sau.domain.Production">
+        insert into sau_production_info_msg
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="productionName != null and productionName !=''">
+                production_name,
+            </if>
+            <if test="productionRequire != null and productionRequire !=''">
+                production_require,
+            </if>
+            <if test="productionBegin != null and productionBegin !=''">
+                production_begin,
+            </if>
+            <if test="productionEnd != null and productionEnd !=''">
+                production_end,
+            </if>
+            <if test="productionOver != null and productionOver !=''">
+                production_over,
+            </if>
+            <if test="productionCompany != null and productionCompany !=''">
+                production_company,
+            </if>
+            <if test="productionIntro != null and productionIntro !=''">
+                production_intro,
+            </if>
+            <if test="productionWeeks != null and productionWeeks !=0">
+                production_weeks,
+            </if>
+            <if test="productionWeekly != null and productionWeekly !=''">
+                production_weekly,
+            </if>
+            <if test="pacific != null and pacific !=''">
+                pacific,
+            </if>
+            <if test="exam != null and exam !=''">
+                exam,
+            </if>
+            state
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="productionName != null and productionName !=''">
+                #{productionName},
+            </if>
+            <if test="productionRequire != null and productionRequire !=''">
+                #{productionRequire},
+            </if>
+            <if test="productionBegin != null and productionBegin !=''">
+                #{productionBegin},
+            </if>
+            <if test="productionEnd != null and productionEnd !=''">
+                #{productionEnd},
+            </if>
+            <if test="productionOver != null and productionOver !=''">
+                #{productionOver},
+            </if>
+            <if test="productionCompany != null and productionCompany !=''">
+                #{productionCompany},
+            </if>
+            <if test="productionIntro != null and productionIntro !=''">
+                #{productionIntro},
+            </if>
+            <if test="productionWeeks != null and productionWeeks !=0">
+                #{productionWeeks},
+            </if>
+            <if test="productionWeekly != null and productionWeekly !=''">
+                #{productionWeekly},
+            </if>
+            <if test="pacific != null and pacific !=''">
+                #{pacific},
+            </if>
+            <if test="exam != null and exam !=''">
+                #{exam},
+            </if>
+            1
+        </trim>
+    </insert>
+
+    <update id="updateProduction" parameterType="map">
+        update sau_production_info_msg
+        <set>
+            <if test="productionName != null and productionName !=''">
+                production_name = #{productionName},
+            </if>
+            <if test="productionRequire != null and productionRequire !=''">
+                production_require = #{productionRequire},
+            </if>
+            <if test="productionBegin != null and productionBegin !=''">
+                production_begin = #{productionBegin},
+            </if>
+            <if test="productionEnd != null and productionEnd !=''">
+                production_end = #{productionEnd},
+            </if>
+            <if test="productionOver != null and productionOver !=''">
+                production_over = #{productionOver},
+            </if>
+            <if test="productionCompany != null and productionCompany !=''">
+                production_company = #{productionCompany},
+            </if>
+            <if test="productionIntro != null and productionIntro !=''">
+                production_intro = #{productionIntro},
+            </if>
+            <if test="productionWeeks != null and productionWeeks !=0">
+                production_weeks = #{productionWeeks},
+            </if>
+            <if test="productionWeekly != null and productionWeekly !=''">
+                production_weekly = #{productionWeekly},
+            </if>
+            <if test="pacific != null and pacific !=''">
+                pacific = #{pacific},
+            </if>
+            <if test="exam != null and exam !=''">
+                exam = #{exam},
+            </if>
+        </set>
+        where state = 1 and production_id = #{productionId}
+    </update>
+
+    <update id="deleteProduction" parameterType="long">
+        update sau_production_info_msg
+        set state = 2
+        where production_id in
+        <foreach collection="array" item="productionId" open="(" separator="," close=")">
+            #{productionId}
+        </foreach>
+    </update>
+
+    <update id="deleteProduction2" parameterType="long">
+        update sau_production_weekly_msg a,sau_student_production_msg b,sau_production_info_msg c
+        set a.state = 2
+        where a.state = 1 and b.state = 1 and c.state = 1 and
+        a.stu_prod_id = b.stu_prod_id and b.production_id = c.production_id
+        and c.production_id in
+        <foreach collection="array" item="productionId" open="(" separator="," close=")">
+            #{productionId}
+        </foreach>
+    </update>
+
+    <update id="deleteProduction3" parameterType="long">
+        update sau_student_production_msg a,sau_production_info_msg b
+        set a.state = 2
+        where a.state = 1 and b.state = 1 and
+        a.production_id = b.production_id
+        and b.production_id in
+        <foreach collection="array" item="productionId" open="(" separator="," close=")">
+            #{productionId}
+        </foreach>
+    </update>
+
+    <select id="selectProduction" resultType="map">
+        select
+        production_id as "productionId",
+        production_name as "productionName",
+        production_require as "productionRequire",
+        production_begin as "productionBegin",
+        production_end as "productionEnd",
+        production_over as "productionOver",
+        production_company as "productionCompany",
+        production_intro as "productionIntro",
+        production_weeks as "productionWeeks",
+        production_weekly as "productionWeekly",
+        pacific as "pacific",
+        exam as "exam"
+        from sau_production_info_msg
+        <where>
+            state = 1
+            <if test="productionId != null and productionId != 0">
+                and production_id = #{productionId}
+            </if>
+            <if test="productionName != null and productionName != ''">
+                and production_name like concat('%',#{productionName},'%')
+            </if>
+            <if test="productionCompany != null and productionCompany != ''">
+                and production_company like concat('%',#{productionCompany},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="selectProductionById" resultType="com.ruoyi.sau.domain.Production" parameterType="long">
+        select
+        production_id as "productionId",
+        production_name as "productionName",
+        production_require as "productionRequire",
+        production_begin as "productionBegin",
+        production_end as "productionEnd",
+        production_over as "productionOver",
+        production_company as "productionCompany",
+        production_intro as "productionIntro",
+        production_weeks as "productionWeeks",
+        production_weekly as "productionWeekly",
+        pacific as "pacific",
+        exam as "exam"
+        from sau_production_info_msg
+        where state = 1 and production_id = #{productionId}
+    </select>
+
+    <select id="selectProductionByStuProdId" resultType="com.ruoyi.sau.domain.Production" parameterType="long">
+        select
+        b.production_id as "productionId",
+        b.production_name as "productionName",
+        b.production_require as "productionRequire",
+        b.production_begin as "productionBegin",
+        b.production_end as "productionEnd",
+        b.production_over as "productionOver",
+        b.production_company as "productionCompany",
+        b.production_intro as "productionIntro",
+        b.production_weeks as "productionWeeks",
+        b.production_weekly as "productionWeekly",
+        b.pacific as "pacific",
+        b.exam as "exam"
+        from sau_student_production_msg a
+        left join sau_production_info_msg b on a.production_id = b.production_id
+        where a.state = 1 and b.state = 1 and a.stu_prod_id = #{stuProdId}
+    </select>
+
+    <select id="getProductionByStuId" parameterType="long" resultType="long">
+        select production_id
+        from sau_student_production_msg
+        where student_id = #{userId} and state = 1 and audit_state != 3
+    </select>
+</mapper>

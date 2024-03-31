@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('我的成绩')" />
+</head>
+<body class="gray-bg">
+<div class="container-div">
+	<div class="row">
+		<div class="col-sm-12 search-collapse">
+			<form id="role-form">
+				<div class="select-list">
+					<ul>
+						<li>
+							编号：<input type="text" name="workId"/>
+						</li>
+						<li>
+							名称：<input type="text" name="workName"/>
+						</li>
+						<li>
+							实习单位：<input type="text" name="company"/>
+						</li>
+						<li>
+							<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+							<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+						</li>
+					</ul>
+				</div>
+			</form>
+		</div>
+
+		<div class="btn-group-sm" id="toolbar" role="group">
+
+		</div>
+
+		<div class="col-sm-12 select-table table-striped">
+			<table id="bootstrap-table"></table>
+		</div>
+	</div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+	var seeFlag = [[${@permission.hasPermi('system:myworkgrade:see')}]];
+	var prefix = ctx + "sau/myworkgrade";
+
+	$(function() {
+		var options = {
+			url: prefix + "/selectMyGrade",
+			updateUrl: prefix + "/see/{id}",
+			sortName: "stuWorkId",
+			modalName: "顶岗实习",
+			columns: [
+				{
+					field: 'stuWorkId',
+					title: '编号'
+				},
+				{
+					field: 'workName',
+					title: '名称'
+				},
+				{
+					field: 'begining',
+					title: '开始时间'
+				},
+				{
+					field: 'ending',
+					title: '结束时间'
+				},
+				{
+					field: 'company',
+					cellStyle: formatTableUnit,
+					formatter: paramsMatter,
+					title: '实习单位'
+				},
+				{
+					field: 'pacificScore',
+					title: '周报成绩'
+				},
+				{
+					field: 'examScore',
+					title: '总结成绩'
+				},
+				{
+					field: 'score',
+					title: '总成绩'
+				},
+				{
+					field: 'ownScore',
+					title: '最终成绩'
+				},
+				{
+					title: '操作',
+					align: 'center',
+					formatter: function(value, row, index) {
+						var actions = [];
+						actions.push('<a class="btn btn-success btn-xs ' + seeFlag + '" href="javascript:void(0)" onclick="see(\'' + row.stuWorkId+ '\')"><i class="fa fa-edit"></i>详情</a> ');
+						return actions.join('');
+					}
+				}]
+		};
+		$.table.init(options);
+	});
+
+	function see(id) {
+		table.set();
+		if($.common.isEmpty(id) && table.options.type == table_type.bootstrapTreeTable) {
+			var row = $("#" + table.options.id).bootstrapTreeTable('getSelections')[0];
+			if ($.common.isEmpty(row)) {
+				$.modal.alertWarning("请至少选择一条记录");
+				return;
+			}
+			var url = table.options.updateUrl.replace("{id}", row[table.options.uniqueId]);
+			$.modal.open("我的" + table.options.modalName + "总结", url);
+		} else {
+			$.modal.open("我的" + table.options.modalName + "总结", $.operate.editUrl(id));
+		}
+	}
+
+	function paramsMatter(value, row, index) {
+		var span = document.createElement("span");
+		span.setAttribute("title", (typeof(value) == "undefined") ? "-" : value);
+		span.innerHTML = (typeof(value) == "undefined") ? "-" : value;
+		return span.outerHTML;
+	}
+	//td宽度以及内容超过宽度隐藏
+	function formatTableUnit(value, row, index) {
+		return {
+			css: {
+				"white-space": "nowrap",
+				"text-overflow": "ellipsis",
+				"overflow": "hidden",
+				"max-width": "60px"
+			}
+		}
+	}
+
+</script>
+</body>
+</html>

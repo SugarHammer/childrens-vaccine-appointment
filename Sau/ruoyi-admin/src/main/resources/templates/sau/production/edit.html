@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改生产实习信息')" />
+	<th:block th:include="include :: ztree-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal m" id="form-role-edit" th:object="${production}">
+			<input id="productionId" name="productionId" type="hidden" th:field="*{productionId}"/>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">名称：</label>
+				<div class="col-sm-8">
+					<textarea class="form-control" type="text" name="productionName" id="productionName" th:field="*{productionName}" required></textarea>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">申请要求：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="productionRequire" id="productionRequire" th:field="*{productionRequire}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">开始时间：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="productionBegin" id="productionBegin" th:field="*{productionBegin}" required placeholder="年-月-日">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">结束时间：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="productionEnd" id="productionEnd" th:field="*{productionEnd}" required placeholder="年-月-日">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">申请截至时间：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="productionOver" id="productionOver" th:field="*{productionOver}" required placeholder="年-月-日">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">疫苗单位名称：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="productionCompany" id="productionCompany" th:field="*{productionCompany}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">疫苗单位简介：</label>
+				<div class="col-sm-8">
+					<textarea class="form-control" type="text" name="productionIntro" id="productionIntro" th:field="*{productionIntro}" required></textarea>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">剂次：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="productionWeeks" id="productionWeeks" th:field="*{productionWeeks}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">备注：</label>
+				<div class="col-sm-8">
+					<textarea class="form-control" type="text" name="productionWeekly" id="productionWeekly" th:field="*{productionWeekly}" required></textarea>
+				</div>
+			</div>
+			<div class="form-group" hidden="hidden">
+				<label class="col-sm-3 control-label ">周报成绩占比(%)：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="pacific" id="pacific" th:field="*{pacific}" required>
+				</div>
+			</div>
+			<div class="form-group" hidden="hidden">
+				<label class="col-sm-3 control-label ">总结成绩占比(%)：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="exam" id="exam" th:field="*{exam}" required>
+				</div>
+			</div>
+		</form>
+	</div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: ztree-js" />
+	<th:block th:include="include :: datetimepicker-js" />
+	<script type="text/javascript">
+	     $(function() {
+			 $("#productionBegin").datetimepicker({
+				 format: "yyyy-mm-dd",
+				 minView: "month",
+				 autoclose: true
+			 });
+			 $("#productionEnd").datetimepicker({
+				 format: "yyyy-mm-dd",
+				 minView: "month",
+				 autoclose: true
+			 });
+			 $("#productionOver").datetimepicker({
+				 format: "yyyy-mm-dd",
+				 minView: "month",
+				 autoclose: true
+			 });
+		});
+
+		function edit() {
+			var productionId = $("input[name='productionId']").val();
+			var productionName = $("input[name='productionName']").val();
+			var productionRequire = $("textarea[name='productionRequire']").val();
+			var productionBegin = $("input[name='productionBegin']").val();
+			var productionEnd = $("input[name='productionEnd']").val();
+			var productionOver = $("input[name='productionOver']").val();
+			var productionCompany = $("input[name='productionCompany']").val();
+			var productionIntro = $("textarea[name='productionIntro']").val();
+			var productionWeeks = $("input[name='productionWeeks']").val();
+			var productionWeekly = $("textarea[name='productionWeekly']").val();
+			var pacific = $("input[name='pacific']").val();
+			var exam = $("input[name='exam']").val();
+			$.ajax({
+				cache : true,
+				type : "POST",
+				url : ctx + "sau/production/updateProduction",
+				data : {
+					"productionId": productionId,
+					"productionName": productionName,
+					"productionRequire":productionRequire,
+					"productionBegin": productionBegin,
+					"productionEnd": productionEnd,
+					"productionOver": productionOver,
+					"productionCompany": productionCompany,
+					"productionIntro": productionIntro,
+					"productionWeeks": productionWeeks,
+					"productionWeekly": productionWeekly,
+					"pacific": pacific,
+					"exam": exam
+				},
+				async : false,
+				error : function(request) {
+					$.modal.alertError("系统错误");
+				},
+				success : function(data) {
+					$.operate.successCallback(data);
+				}
+			});
+		}
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	edit();
+	        }
+	    }
+	</script>
+</body>
+</html>

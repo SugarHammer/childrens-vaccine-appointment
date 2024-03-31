@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增课程')" />
+	<th:block th:include="include :: ztree-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal m" id="form-role-add">
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">课程名称：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="courseName" id="courseName" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">任课教师号：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="teacherId" id="teacherId" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">学时：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="courseTime" id="courseTime" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">学分：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="coursePoint" id="coursePoint" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">平时成绩占比(%)：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="pacific" id="pacific" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">考试成绩占比(%)：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="exam" id="exam" required>
+				</div>
+			</div>
+		</form>
+	</div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: ztree-js" />
+	<th:block th:include="include :: datetimepicker-js" />
+	<script type="text/javascript">
+	    $(function() {
+
+		});
+		
+		$("#form-role-add").validate({
+			rules:{
+				onkeyup: false,
+				roleName:{
+					remote: {
+		                url: ctx + "system/role/checkRoleNameUnique",
+		                type: "post",
+		                dataType: "json",
+		                data: {
+		                	"roleName" : function() {
+		                		return $.common.trim($("#roleName").val());
+		                    }
+		                },
+		                dataFilter: function(data, type) {
+		                	return $.validate.unique(data);
+		                }
+		            }
+				},
+				roleKey:{
+					remote: {
+		                url: ctx + "system/role/checkRoleKeyUnique",
+		                type: "post",
+		                dataType: "json",
+		                data: {
+		                	"roleKey" : function() {
+		                        return $.common.trim($("#roleKey").val());
+		                    }
+		                },
+		                dataFilter: function(data, type) {
+		                	return $.validate.unique(data);
+		                }
+		            }
+				},
+				roleSort:{
+					digits:true
+				},
+			},
+			messages: {
+		        "roleName": {
+		            remote: "角色名称已经存在"
+		        },
+		        "roleKey": {
+		            remote: "角色权限已经存在"
+		        }
+		    },
+		    focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	add();
+	        }
+	    }
+	
+		function add() {
+			var courseName = $("input[name='courseName']").val();
+			var teacherId = $("input[name='teacherId']").val();
+			var courseTime = $("input[name='courseTime']").val();
+			var coursePoint = $("input[name='coursePoint']").val();
+			var pacific = $("input[name='pacific']").val();
+			var exam = $("input[name='exam']").val();
+			$.ajax({
+				cache : true,
+				type : "POST",
+				url : ctx + "project/course/addCourse",
+				data : {
+					"courseName": courseName,
+					"teacherId": teacherId,
+					"courseTime": courseTime,
+					"coursePoint": coursePoint,
+					"pacific": pacific,
+					"exam": exam
+				},
+				async : false,
+				error : function(request) {
+					$.modal.alertError("系统错误");
+				},
+				success : function(data) {
+					$.operate.successCallback(data);
+				}
+			});
+		}
+	</script>
+</body>
+</html>

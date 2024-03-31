@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('填写周报信息')" />
+	<th:block th:include="include :: ztree-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal m" id="form-role-edit" th:object="${workly}">
+			<input id="worklyId" name="worklyId" type="hidden" th:field="*{worklyId}"/>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">周报内容：</label>
+				<div class="col-sm-8">
+					<textarea class="form-control" type="text" name="worklyMain" id="worklyMain" th:field="*{worklyMain}"
+							  style="margin: 0px 12px 0px 0px; width: 461px; height: 444px;"/>
+				</div>
+			</div>
+		</form>
+	</div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: ztree-js" />
+	<th:block th:include="include :: datetimepicker-js" />
+	<script type="text/javascript">
+	     $(function() {
+
+		});
+
+		function edit() {
+			var worklyId = $("input[name='worklyId']").val();
+			var worklyMain = $("textarea[name='worklyMain']").val();
+			$.ajax({
+				cache : true,
+				type : "POST",
+				url : ctx + "sau/myprod/updateWeekly",
+				data : {
+					"worklyId": worklyId,
+					"worklyMain": worklyMain
+				},
+				async : false,
+				error : function(request) {
+					$.modal.alertError("系统错误");
+				},
+				success : function(data) {
+					$.operate.successCallback(data);
+				}
+			});
+		}
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	edit();
+	        }
+	    }
+	</script>
+</body>
+</html>

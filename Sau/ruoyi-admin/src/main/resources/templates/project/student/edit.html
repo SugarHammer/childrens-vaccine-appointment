@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改学生信息')" />
+	<th:block th:include="include :: ztree-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal m" id="form-role-edit" th:object="${student}">
+			<input id="studentId" name="studentId" type="hidden" th:field="*{studentId}"/>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">用户名称：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="studentName" id="studentName" th:field="*{studentName}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">健康打分：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="studentGrade" id="studentGrade" th:field="*{studentGrade}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">出生日期：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="studentBirthday" id="studentBirthday" th:field="*{studentBirthday}" required placeholder="年-月-日">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">用户性别：</label>
+				<div class="col-sm-8">
+					<select class="form-control" name="studentSex" id="studentSex" th:field="*{studentSex}" required>
+						<option value="0">男</option>
+						<option value="1">女</option>
+						<option value="2">未知</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">所在单位：</label>
+				<div class="col-sm-8">
+					<select class="form-control" name="departmentId" id="departmentId" th:with="type=${@dept.getDepartmentId()}" th:field="*{departmentId}" required>
+						<option th:each="dept : ${type}" th:text="${dept.deptName}" th:value="${dept.deptId}"></option>
+					</select>
+				</div>
+			</div>
+		</form>
+	</div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: ztree-js" />
+	<th:block th:include="include :: datetimepicker-js" />
+	<script type="text/javascript">
+	     $(function() {
+			 $("#studentBirthday").datetimepicker({
+				 format: "yyyy-mm-dd",
+				 minView: "month",
+				 autoclose: true
+			 });
+		});
+
+		function edit() {
+			var studentId = $("input[name='studentId']").val();
+			var studentName = $("input[name='studentName']").val();
+			var studentGrade = $("input[name='studentGrade']").val();
+			var studentBirthday = $("input[name='studentBirthday']").val();
+			var studentSex = $("#studentSex").val();
+			var departmentId = $("#departmentId").val();
+			$.ajax({
+				cache : true,
+				type : "POST",
+				url : ctx + "project/student/updateStudent",
+				data : {
+					"studentId": studentId,
+					"studentName": studentName,
+					"studentGrade": studentGrade,
+					"studentBirthday": studentBirthday,
+					"studentSex": studentSex,
+					"departmentId": departmentId
+				},
+				async : false,
+				error : function(request) {
+					$.modal.alertError("系统错误");
+				},
+				success : function(data) {
+					$.operate.successCallback(data);
+				}
+			});
+		}
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	edit();
+	        }
+	    }
+	</script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.mapper.SacMapper">
+    <resultMap id="courseResult" type="com.ruoyi.project.domain.Course">
+        <id property="courseId" column="course_id"></id>
+        <result property="courseName" column="course_name"></result>
+        <result property="teacherId" column="teacher_id"></result>
+        <result property="teacherName" column="teacher_name"></result>
+        <result property="courseTime" column="course_time"></result>
+        <result property="coursePoint" column="course_point"></result>
+        <result property="pacific" column="pacific"></result>
+        <result property="exam" column="exam"></result>
+        <result property="state" column="state"></result>
+    </resultMap>
+    <insert id="stuAddCourse" parameterType="long">
+        insert into sau_student_course_msg(
+          student_id,
+          course_id,
+          state
+        )
+        values(
+          #{userId},
+          #{courseId},
+          1
+        )
+    </insert>
+
+    <select id="getCourseByStuId" parameterType="long" resultType="long">
+        select course_id
+        from sau_student_course_msg
+        where student_id = #{userId} and state = 1
+    </select>
+
+    <select id="getTotalPoint" parameterType="long" resultType="int">
+        select ifnull(sum(course_point),0)
+        from sau_course_info_msg
+        where course_id in (
+          select course_id
+          from sau_student_course_msg
+          where student_id = #{userId} and state = 1
+        )and state = 1
+    </select>
+
+    <select id="selectCourseById" resultMap="courseResult">
+        select
+        course_id,
+        course_name,
+        teacher_id,
+        teacher_name,
+        course_time,
+        course_point,
+        pacific,
+        exam,
+        state
+        from sau_course_info_msg
+        where
+        course_id in (
+            select course_id
+            from sau_student_course_msg
+            where student_id = #{userId}
+            and state = 1
+        )
+        and state = 1
+        <if test="courseId != null and courseId != 0">
+            and course_id = #{courseId}
+        </if>
+        <if test="courseName != null and courseName != ''">
+            and course_name like concat('%',#{courseName},'%')
+        </if>
+        <if test="teacherName != null and teacherName != ''">
+            and teacher_name like concat('%',#{teacherName},'%')
+        </if>
+    </select>
+
+    <select id="selectCourseByTeaId" parameterType="long" resultType="map">
+        select
+        b.curricula_id as "curriculaId",
+        a.course_id as "courseId",
+        a.course_name as "courseName",
+        a.teacher_id as "teacherId",
+        a.teacher_name as "teacherName",
+        a.course_time as "courseTime",
+        a.course_point as "coursePoint",
+        b.pacific_score as "pacificScore",
+        b.exam_score as "examScore",
+        b.score as "score",
+        c.student_id as "studentId",
+        c.student_name as "studentName"
+        from
+        sau_student_course_msg b
+		left join sau_course_info_msg a on a.course_id = b.course_id
+        left join sau_student_info_msg c on b.student_id = c.student_id
+        where a.teacher_id = #{teaId} and a.state = 1 and b.state = 1 and c.state = 1
+        <if test="courseId != null and courseId != 0">
+            and a.course_id = #{courseId}
+        </if>
+        <if test="courseName != null and courseName != ''">
+            and a.course_name like concat('%',#{courseName},'%')
+        </if>
+        <if test="studentId != null and studentId != 0">
+            and b.student_id = #{studentId}
+        </if>
+        <if test="studentName != null and studentName != ''">
+            and c.student_name like concat('%',#{studentName},'%')
+        </if>
+    </select>
+
+    <select id="selectCourseByStuId" parameterType="long" resultType="map">
+        select
+        b.curricula_id as "curriculaId",
+        a.course_id as "courseId",
+        a.course_name as "courseName",
+        a.teacher_id as "teacherId",
+        a.teacher_name as "teacherName",
+        a.course_time as "courseTime",
+        a.course_point as "coursePoint",
+        b.student_id as "studentId",
+        b.pacific_score as "pacificScore",
+        b.exam_score as "examScore",
+        b.score as "score",
+        c.department_id as "departmentId"
+        from
+        sau_student_course_msg b
+        left join sau_course_info_msg a on a.course_id = b.course_id
+        left join sau_student_info_msg c on b.student_id = c.student_id
+        where b.student_id = #{stuId} and b.state = 1 and a.state = 1 and c.state = 1
+        <if test="courseId != null and courseId != 0">
+            and a.course_id = #{courseId}
+        </if>
+        <if test="courseName != null and courseName != ''">
+            and a.course_name like concat('%',#{courseName},'%')
+        </if>
+        <if test="teacherName != null and teacherName != ''">
+            and a.teacher_name like concat('%',#{teacherName},'%')
+        </if>
+    </select>
+
+    <select id="selectAllCourse" resultType="map">
+        select
+        b.curricula_id as "curriculaId",
+        a.course_id as "courseId",
+        a.course_name as "courseName",
+        a.teacher_id as "teacherId",
+        a.teacher_name as "teacherName",
+        a.course_time as "courseTime",
+        a.course_point as "coursePoint",
+        b.student_id as "studentId",
+        b.pacific_score as "pacificScore",
+        b.exam_score as "examScore",
+        b.score as "score",
+        c.student_name as "studentName",
+        c.department_id as "departmentId"
+        from
+        sau_student_course_msg b
+        left join sau_course_info_msg a on a.course_id = b.course_id
+        left join sau_student_info_msg c on b.student_id = c.student_id
+        where b.state = 1 and a.state = 1 and c.state = 1
+        <if test="courseId != null and courseId != 0">
+            and a.course_id = #{courseId}
+        </if>
+        <if test="courseName != null and courseName != ''">
+            and a.course_name like concat('%',#{courseName},'%')
+        </if>
+        <if test="teacherName != null and teacherName != ''">
+            and a.teacher_name like concat('%',#{teacherName},'%')
+        </if>
+        <if test="studentId != null and studentId != 0">
+            and b.student_id = #{studentId}
+        </if>
+        <if test="departmentId != null and departmentId != 0">
+            and c.department_id = #{departmentId}
+        </if>
+    </select>
+
+    <update id="deleteByCourseId">
+        update sau_student_course_msg
+        set state = 0
+        where course_id = #{course}
+        and student_id = #{userId}
+    </update>
+
+    <select id="getByCurrId" parameterType="long" resultType="com.ruoyi.project.domain.StuAndCou">
+        select
+        curricula_id as "curriculaId",
+        student_id as "studentId",
+        course_id as "courseId" ,
+        pacific_score as "pacificScore",
+        exam_score as "examScore",
+        score as "score"
+        from sau_student_course_msg
+        where curricula_id = #{curriculaId} and state = 1
+    </select>
+
+    <update id="addGrade">
+        update sau_student_course_msg
+        set
+        pacific_score = #{pacificScore},
+        exam_score = #{examScore},
+        score = #{score}
+        where curricula_id = #{curriculaId} and state = 1
+    </update>
+</mapper>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.sau.mapper.CourseReplaceMapper">
+    <insert id="addCourseReplace">
+        insert into sau_course_exchange_msg
+        (
+          stu_work_id,
+          course_name,
+          state
+        )
+        values (
+          #{stuWorkId},
+          #{course},
+          1
+        )
+    </insert>
+
+    <update id="deleteByWorkId" parameterType="long">
+        update sau_course_exchange_msg a,sau_student_work_msg b,sau_work_info_msg c
+        set a.state = 2
+        where a.state = 1 and b.state = 1 and c.state = 1
+        and b.work_id = c.work_id and a.stu_work_id = b.stu_work_id
+        and c.work_id in
+        <foreach collection="array" item="workId" open="(" separator="," close=")">
+            #{workId}
+        </foreach>
+    </update>
+
+    <update id="deleteCourseByStuWorkId">
+        update sau_course_exchange_msg
+        set state = 2
+        where stu_work_id = #{stuWorkId}
+    </update>
+
+    <select id="selectCourseByStuWorkId" resultType="string">
+        select
+        course_name as "courseName"
+        from sau_course_exchange_msg
+        where state = 1 and stu_work_id = #{stuWorkId}
+    </select>
+</mapper>

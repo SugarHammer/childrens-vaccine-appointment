@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改顶岗实习信息')" />
+	<th:block th:include="include :: ztree-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal m" id="form-role-edit" th:object="${work}">
+			<input id="workId" name="workId" type="hidden" th:field="*{workId}"/>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">名称：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="productionName" id="productionName" th:field="*{workName}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">申请要求：</label>
+				<div class="col-sm-8">
+					<textarea class="form-control" type="text" name="workRequire" id="workRequire" th:field="*{workRequire}" required></textarea>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">申请截至时间：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="workOver" id="workOver" th:field="*{workOver}" required placeholder="年-月-日">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">周报数量：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="workWeeks" id="workWeeks" th:field="*{workWeeks}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">周报填写要求：</label>
+				<div class="col-sm-8">
+					<textarea class="form-control" type="text" name="workWeekly" id="workWeekly" th:field="*{workWeekly}" required></textarea>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">周报开始时间：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="workBegin" id="workBegin" th:field="*{workBegin}" required placeholder="年-月-日">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">周报结束时间：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="workEnd" id="workEnd" th:field="*{workEnd}" required placeholder="年-月-日">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">周报成绩占比(%)：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="pacific" id="pacific" th:field="*{pacific}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">总结成绩占比(%)：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="exam" id="exam" th:field="*{exam}" required>
+				</div>
+			</div>
+		</form>
+	</div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: ztree-js" />
+	<th:block th:include="include :: datetimepicker-js" />
+	<script type="text/javascript">
+	     $(function() {
+			 $("#workOver").datetimepicker({
+				 format: "yyyy-mm-dd",
+				 minView: "month",
+				 autoclose: true
+			 });
+			 $("#workBegin").datetimepicker({
+				 format: "yyyy-mm-dd",
+				 minView: "month",
+				 autoclose: true
+			 });
+			 $("#workEnd").datetimepicker({
+				 format: "yyyy-mm-dd",
+				 minView: "month",
+				 autoclose: true
+			 });
+		});
+
+		function edit() {
+			var workId = $("input[name='workId']").val();
+			var workName = $("input[name='workName']").val();
+			var workRequire = $("textarea[name='workRequire']").val();
+			var workOver = $("input[name='workOver']").val();
+			var workWeeks = $("input[name='workWeeks']").val();
+			var workWeekly = $("textarea[name='workWeekly']").val();
+			var workBegin = $("input[name='workBegin']").val();
+			var workEnd = $("input[name='workEnd']").val();
+			var pacific = $("input[name='pacific']").val();
+			var exam = $("input[name='exam']").val();
+			$.ajax({
+				cache : true,
+				type : "POST",
+				url : ctx + "sau/work/updateWork",
+				data : {
+					"workId": workId,
+					"workName": workName,
+					"workRequire": workRequire,
+					"workOver": workOver,
+					"workWeeks": workWeeks,
+					"workWeekly": workWeekly,
+					"workBegin": workBegin,
+					"workEnd": workEnd,
+					"pacific": pacific,
+					"exam": exam
+				},
+				async : false,
+				error : function(request) {
+					$.modal.alertError("系统错误");
+				},
+				success : function(data) {
+					$.operate.successCallback(data);
+				}
+			});
+		}
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	edit();
+	        }
+	    }
+	</script>
+</body>
+</html>

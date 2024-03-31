@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.mapper.TeacherMapper">
+    <insert id="addTeacher" parameterType="com.ruoyi.project.domain.Teacher">
+      insert into sau_teacher_info_msg
+      <trim  prefix="(" suffix=")" suffixOverrides="," >
+          <if test="teacherId != null and teacherId != 0">
+              teacher_id,
+          </if>
+          <if test="teacherName != null and teacherName != ''">
+              teacher_name,
+          </if>
+          <if test="teacherSex != null">
+              teacher_sex,
+          </if>
+          <if test="teacherBirthday != null">
+              teacher_birthday,
+          </if>
+          <if test="departmentId != null and departmentId != 0">
+              department_id,
+          </if>
+          <if test="teacherTitle != null and teacherTitle != 0">
+              teacher_title,
+          </if>
+          <if test="teacherTechnical != null and teacherTechnical != ''">
+              teacher_technical,
+          </if>
+          state
+      </trim>
+      <trim prefix="values (" suffix=")" suffixOverrides=",">
+          <if test="teacherId != null and teacherId != 0">
+              #{teacherId},
+          </if>
+          <if test="teacherName != null and teacherName != ''">
+              #{teacherName},
+          </if>
+          <if test="teacherSex != null">
+              #{teacherSex},
+          </if>
+          <if test="teacherBirthday != null">
+              #{teacherBirthday},
+          </if>
+          <if test="departmentId != null and departmentId != 0">
+              #{departmentId},
+          </if>
+          <if test="teacherTitle != null and teacherTitle != 0">
+              #{teacherTitle},
+          </if>
+          <if test="teacherTechnical != null and teacherTechnical != ''">
+              #{teacherTechnical},
+          </if>
+          1
+      </trim>
+    </insert>
+
+    <update id="deleteTeacher" parameterType="long">
+        update sau_teacher_info_msg
+        set state = 0
+        where teacher_id in
+        <foreach collection="array" item="teacherId" open="(" separator="," close=")">
+            #{teacherId}
+        </foreach>
+    </update>
+
+    <update id="deleteTeacher2" parameterType="long">
+        update sau_course_info_msg
+        set state = 0
+        where teacher_id in
+        <foreach collection="array" item="teacherId" open="(" separator="," close=")">
+            #{teacherId}
+        </foreach>
+    </update>
+
+    <update id="deleteTeacher3" parameterType="long">
+        update sau_student_course_msg
+        set state = 0
+        where course_id in
+        (
+            select course_id
+            from sau_course_info_msg
+            where teacher_id in
+            <foreach collection="array" item="teacherId" open="(" separator="," close=")">
+                #{teacherId}
+            </foreach>
+        )
+    </update>
+
+    <update id="updateTeacher" parameterType="com.ruoyi.project.domain.Teacher">
+        update sau_teacher_info_msg
+        <set>
+            <if test="teacherName != null and teacherName != ''">
+                teacher_name = #{teacherName},
+            </if>
+            <if test="teacherSex != null">
+                teacher_sex = #{teacherSex},
+            </if>
+            <if test="teacherBirthday != null">
+                teacher_birthday = #{teacherBirthday},
+            </if>
+            <if test="departmentId != null and departmentId != 0">
+                department_id = #{departmentId},
+            </if>
+            <if test="teacherTitle != null and teacherTitle != 0">
+                teacher_title = #{teacherTitle},
+            </if>
+            <if test="teacherTechnical != null and teacherTechnical != ''">
+                teacher_technical = #{teacherTechnical},
+            </if>
+        </set>
+        where teacher_id = #{teacherId}
+    </update>
+
+    <select id="selectTeacher" resultType="map">
+        select
+        teacher_id as "teacherId",
+        teacher_name as "teacherName",
+        case teacher_sex when 0 then '男' when 1 then '女' when 2 then '未知' End as "teacherSex",
+        teacher_birthday as "teacherBirthday",
+        department_id as "departmentId",
+        teacher_title as "teacherTitle",
+        teacher_technical as "teacherTechnical"
+        from sau_teacher_info_msg
+        <where>
+            state = 1
+            <if test="teacherId != null and teacherId != 0">
+                and teacher_id = #{teacherId}
+            </if>
+            <if test="teacherName != null and teacherName != ''">
+                and teacher_name like concat('%',#{teacherName},'%')
+            </if>
+            <if test="departmentId != null and departmentId != 0">
+                and department_id = #{departmentId}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectTeacherById" resultType="com.ruoyi.project.domain.Teacher" parameterType="long">
+        select
+        teacher_id as "teacherId",
+        teacher_name as "teacherName",
+        teacher_sex as "teacherSex",
+        teacher_birthday as "teacherBirthday",
+        department_id as "departmentId",
+        teacher_title as "teacherTitle",
+        teacher_technical as "teacherTechnical"
+        from sau_teacher_info_msg
+        where state = 1 and teacher_id = #{teacherId}
+    </select>
+</mapper>

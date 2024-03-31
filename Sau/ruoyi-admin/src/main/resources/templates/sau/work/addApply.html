@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('学生端申请顶岗实习填报信息')" />
+	<th:block th:include="include :: ztree-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal m" id="form-role-edit" th:object="${work}">
+			<input id="workId" name="workId" type="hidden" th:field="*{workId}"/>
+			<input id="workBegin" name="workBegin" type="hidden" th:field="*{workBegin}"/>
+			<input id="workEnd" name="workEnd" type="hidden" th:field="*{workEnd}"/>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">名称：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="productionName" id="productionName" th:field="*{workName}" readonly>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">实习企业：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="company" id="company" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">实习地点：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="site" id="site" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">开始时间：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="begining" id="begining" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">结束时间：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="ending" id="ending" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">实习内容：</label>
+				<div class="col-sm-8">
+					<textarea class="form-control" type="text" name="content" id="content" required></textarea>
+				</div>
+			</div>
+			<div class="form-group" id="clid" name="clid">
+				<div>
+					<label class="col-sm-3 control-label ">置换课程：</label>
+					<div class="col-sm-8">
+						<input class="form-control" type="text" name="courseName" id="courseName">
+						<input type="button" value="删除" onclick="del(this);">
+						<input type="button" value="添加" onclick="add();">
+					</div>
+				</div>
+			</div>
+
+		</form>
+	</div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: ztree-js" />
+	<th:block th:include="include :: datetimepicker-js" />
+	<script type="text/javascript">
+
+		$(function() {
+			$("#begining").datetimepicker({
+				format: "yyyy-mm-dd",
+				minView: "month",
+				autoclose: true
+			});
+			$("#ending").datetimepicker({
+				format: "yyyy-mm-dd",
+				minView: "month",
+				autoclose: true
+			});
+		});
+
+		 function add(){
+			 //获取要克隆的对象
+			 var cloneDiv=$("#clid div").eq(0);
+			 //克隆
+			 var newDiv=cloneDiv.clone();
+			 //添加
+			 //添加前清空值
+			 $("input[type='text']",newDiv).val("");
+			 //添加
+			 newDiv.appendTo("#clid");
+		 }
+
+		 //删除
+		 function del(btn){
+			 //获取要删除的对象
+			 var delDiv=$(btn).parent().parent();
+			 //当最后一个的时候不可删除
+			 var lastDiv=$("#clid div");
+			 if(lastDiv.length>2){
+				 delDiv.remove();
+			 }
+		 }
+
+
+		function edit() {
+			var workId = $("input[name='workId']").val();
+			var company = $("input[name='company']").val();
+			var site = $("input[name='site']").val();
+			var begining = $("input[name='begining']").val();
+			var ending = $("input[name='ending']").val();
+			var content = $("textarea[name='content']").val();
+			var workBegin = $("input[name='workBegin']").val();
+			var workEnd = $("input[name='workEnd']").val();
+			var courses = [];
+			$("#clid div div #courseName").each(function(i) {
+				courses[i]=$(this).val()
+			});
+			$.ajax({
+				cache : true,
+				type : "POST",
+				url : ctx + "sau/workapply/addWorkApply",
+				data : {
+					"workId": workId,
+					"company": company,
+					"site": site,
+					"begining": begining,
+					"ending": ending,
+					"content": content,
+					"workBegin": workBegin,
+					"workEnd": workEnd,
+					"courses": courses.join(',')
+				},
+				async : false,
+				error : function(request) {
+					$.modal.alertError("系统错误");
+				},
+				success : function(data) {
+					$.operate.successCallback(data);
+				}
+			});
+		}
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	edit();
+	        }
+	    }
+	</script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('教师列表')" />
+</head>
+<body class="gray-bg">
+	<div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="role-form">
+					<div class="select-list">
+						<ul>
+							<li>
+								职工号：<input type="text" name="teacherId"/>
+							</li>
+							<li>
+								职工姓名：<input type="text" name="teacherName"/>
+							</li>
+							<li>
+								所在单位号：<select name="departmentId" th:with="type=${@dept.getDepartmentId()}">
+								<option value="0">无</option>
+								<option th:each="dept : ${type}" th:text="${dept.deptName}" th:value="${dept.deptId}"></option>
+							</select>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+							    <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+		
+			<div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="system:teacher:add">
+	                <i class="fa fa-plus"></i> 新增
+	            </a>
+	            <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="system:teacher:edit">
+		            <i class="fa fa-edit"></i> 修改
+		        </a>
+				<a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="system:teacher:remove">
+		            <i class="fa fa-remove"></i> 删除
+		        </a>
+		        <!--<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="system:role:export">-->
+		            <!--<i class="fa fa-download"></i> 导出-->
+		        <!--</a>-->
+	        </div>
+	        
+	        <div class="col-sm-12 select-table table-striped">
+			    <table id="bootstrap-table"></table>
+			</div>
+		</div>
+	</div>
+	<th:block th:include="include :: footer" />
+	<script th:inline="javascript">
+		var editFlag = [[${@permission.hasPermi('system:teacher:edit')}]];
+		var removeFlag = [[${@permission.hasPermi('system:teacher:remove')}]];
+		var prefix = ctx + "project/teacher";
+		
+
+		$(function() {
+		    var options = {
+		        url: prefix + "/selectTeacher",
+		        createUrl: prefix + "/add",
+		        updateUrl: prefix + "/edit/{id}",
+		        removeUrl: prefix + "/deleteTeacher",
+		        //exportUrl: prefix + "/export",
+		        sortName: "teacherId",
+		        modalName: "职工",
+		        columns: [{
+		            checkbox: true
+		        },
+		        {
+		            field: 'teacherId',
+		            title: '职工号',
+					sortable: true
+		        },
+		        {
+		            field: 'teacherName',
+		            title: '职工姓名'
+		        },
+					{
+		            field: 'teacherSex',
+		            title: '职工性别'
+		        },
+					{
+						field: 'teacherBirthday',
+						title: '出生日期',
+						sortable: true
+					},
+					{
+						field: 'departmentId',
+						title: '所在单位'
+					},
+					{
+						field: 'teacherTitle',
+						title: '职称'
+					},
+					{
+						field: 'teacherTechnical',
+						title: '技术专长'
+					},
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		                var actions = [];
+		                actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.teacherId+ '\')"><i class="fa fa-edit"></i>编辑</a> ');
+		                // actions.push('<a class="btn btn-primary btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="authDataScope(\'' + row.roleId + '\')"><i class="fa fa-check-square-o"></i>数据权限</a> ');
+		                // actions.push('<a class="btn btn-info btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="authUser(\'' + row.roleId + '\')"><i class="fa fa-user"></i>分配用户</a> ');
+		                actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.teacherId + '\')"><i class="fa fa-remove"></i>删除</a> ');
+		                return actions.join('');
+		            }
+		        }]
+		    };
+		    $.table.init(options);
+		});
+
+	</script>
+</body>
+</html>

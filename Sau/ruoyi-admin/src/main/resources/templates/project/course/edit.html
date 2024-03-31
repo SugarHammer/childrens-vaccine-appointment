@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改课程信息')" />
+	<th:block th:include="include :: ztree-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal m" id="form-role-edit" th:object="${course}">
+			<input id="courseId" name="courseId" type="hidden" th:field="*{courseId}"/>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">课程名称：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="courseName" id="courseName" th:field="*{courseName}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">任课教师号：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="teacherId" id="studentGrade" th:field="*{teacherId}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">学时：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="courseTime" id="courseTime" th:field="*{courseTime}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">学分：</label>
+				<div class="col-sm-8">
+					<input class="form-control" name="coursePoint" id="coursePoint" th:field="*{coursePoint}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">平时成绩占比(%)：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="pacific" id="pacific" th:field="*{pacific}" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">考试成绩占比(%)：</label>
+				<div class="col-sm-8">
+					<input class="form-control" name="exam" id="exam" th:field="*{exam}" required>
+				</div>
+			</div>
+		</form>
+	</div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: ztree-js" />
+	<th:block th:include="include :: datetimepicker-js" />
+	<script type="text/javascript">
+	     $(function() {
+
+		});
+
+		function edit() {
+			var courseId = $("input[name='courseId']").val();
+			var courseName = $("input[name='courseName']").val();
+			var teacherId = $("input[name='teacherId']").val();
+			var courseTime = $("input[name='courseTime']").val();
+			var coursePoint = $("input[name='coursePoint']").val();
+			var pacific = $("input[name='pacific']").val();
+			var exam = $("input[name='exam']").val();
+			$.ajax({
+				cache : true,
+				type : "POST",
+				url : ctx + "project/course/updateCourse",
+				data : {
+					"courseId": courseId,
+					"courseName": courseName,
+					"teacherId": teacherId,
+					"courseTime": courseTime,
+					"coursePoint": coursePoint,
+					"pacific": pacific,
+					"exam": exam
+				},
+				async : false,
+				error : function(request) {
+					$.modal.alertError("系统错误");
+				},
+				success : function(data) {
+					$.operate.successCallback(data);
+				}
+			});
+		}
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	edit();
+	        }
+	    }
+	</script>
+</body>
+</html>

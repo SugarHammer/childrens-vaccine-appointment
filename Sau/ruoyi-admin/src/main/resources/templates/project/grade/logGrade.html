@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('成绩录入')" />
+</head>
+<body class="gray-bg">
+	<div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="role-form">
+					<div class="select-list">
+						<ul>
+							<li>
+								课程号：<input type="text" name="courseId"/>
+							</li>
+							<li>
+								课程名称：<input type="text" name="courseName"/>
+							</li>
+							<li>
+								学生学号：<input type="text" name="studentId"/>
+							</li>
+							<li>
+								学生姓名：<input type="text" name="studentName"/>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+							    <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+		
+			<div class="btn-group-sm" id="toolbar" role="group">
+
+	        </div>
+	        
+	        <div class="col-sm-12 select-table table-striped">
+			    <table id="bootstrap-table"></table>
+			</div>
+		</div>
+	</div>
+	<th:block th:include="include :: footer" />
+	<script th:inline="javascript">
+		var editFlag = [[${@permission.hasPermi('system:log:edit')}]];
+		var prefix = ctx + "project/grade";
+		
+
+		$(function() {
+		    var options = {
+		        url: prefix + "/selectCourseByTeaId",
+				updateUrl: prefix + "/edit/{id}",
+		        sortName: "b.curriculaId",
+		        modalName: "成绩",
+		        columns: [
+					{
+						field: 'curriculaId',
+						title: '选课编号'
+					},
+					{
+						field: 'courseId',
+						title: '课程号'
+					},
+					{
+						field: 'courseName',
+						title: '课程名称'
+					},
+						{
+						field: 'studentId',
+						title: '学生学号'
+					},
+					{
+						field: 'studentName',
+						title: '学生姓名'
+					},
+					{
+						field: 'courseTime',
+						title: '学时'
+					},
+					{
+						field: 'coursePoint',
+						title: '学分'
+					},
+					{
+						field: 'pacificScore',
+						title: '平时成绩'
+					},
+					{
+						field: 'examScore',
+						title: '考试成绩'
+					},
+					{
+						field: 'score',
+						title: '总成绩',
+						sortable: true
+					},
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		                var actions = [];
+		                actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.curriculaId+ '\')"><i class="fa fa-edit"></i>成绩录入</a> ');
+		                return actions.join('');
+		            }
+		        }]
+		    };
+		    $.table.init(options);
+		});
+		
+
+	</script>
+</body>
+</html>

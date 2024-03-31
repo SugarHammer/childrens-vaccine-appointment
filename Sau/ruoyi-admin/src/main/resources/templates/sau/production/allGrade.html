@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('生产实习成绩统计')" />
+</head>
+<body class="gray-bg">
+<div class="container-div">
+	<div class="row">
+		<div class="col-sm-12 search-collapse">
+			<form id="role-form">
+				<div class="select-list">
+					<ul>
+						<li>
+							编号：<input type="text" name="stuProdId" style="width:140px"/>
+						</li>
+						<li>
+							名称：<input type="text" name="productionName" style="width:140px"/>
+						</li>
+						<li>
+							学生姓名：<input type="text" name="studentName" style="width:140px"/>
+						</li>
+						<li>
+							实习单位：<input type="text" name="productionCompany" style="width:140px"/>
+						</li>
+						<li>
+							<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+							<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+						</li>
+					</ul>
+				</div>
+			</form>
+		</div>
+
+		<div class="btn-group-sm" id="toolbar" role="group">
+
+		</div>
+
+		<div class="col-sm-12 select-table table-striped">
+			<table id="bootstrap-table"></table>
+		</div>
+	</div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+	var prefix = ctx + "sau/allgrade";
+
+	$(function() {
+		var options = {
+			url: prefix + "/selectAllGrade",
+			sortName: "stuProdId",
+			modalName: "疫苗信息",
+			columns: [
+				{
+					field: 'stuProdId',
+					title: '编号'
+				},
+				{
+					field: 'productionName',
+					cellStyle: formatTableUnit,
+					formatter: paramsMatter,
+					title: '名称'
+				},
+				{
+					field: 'productionBegin',
+					title: '开始时间'
+				},
+				{
+					field: 'productionEnd',
+					title: '结束时间'
+				},
+				{
+					field: 'studentId',
+					title: '学生学号'
+				},
+				{
+					field: 'studentName',
+					title: '学生姓名'
+				},
+				{
+					field: 'productionCompany',
+					cellStyle: formatTableUnit,
+					formatter: paramsMatter,
+					title: '实习单位名称'
+				},
+				{
+					field: 'productionIntro',
+					cellStyle: formatTableUnit,
+					formatter: paramsMatter,
+					title: '实习单位简介'
+				},
+				{
+					field: 'pacificScore',
+					title: '周报成绩'
+				},
+				{
+					field: 'examScore',
+					title: '总结成绩'
+				},
+				{
+					field: 'score',
+					title: '总成绩',
+					sortable: true
+				},
+				{
+					field: 'ownScore',
+					title: '最终成绩'
+				}
+				]
+		};
+		$.table.init(options);
+	});
+
+	function paramsMatter(value, row, index) {
+		var span = document.createElement("span");
+		span.setAttribute("title", (typeof(value) == "undefined") ? "-" : value);
+		span.innerHTML = (typeof(value) == "undefined") ? "-" : value;
+		return span.outerHTML;
+	}
+	//td宽度以及内容超过宽度隐藏
+	function formatTableUnit(value, row, index) {
+		return {
+			css: {
+				"white-space": "nowrap",
+				"text-overflow": "ellipsis",
+				"overflow": "hidden",
+				"max-width": "60px"
+			}
+		}
+	}
+
+</script>
+</body>
+</html>

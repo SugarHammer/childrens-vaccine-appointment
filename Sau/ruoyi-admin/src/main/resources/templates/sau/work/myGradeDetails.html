@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('我的成绩总结')" />
+	<th:block th:include="include :: ztree-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal m" id="form-role-edit" th:object="${stuAndWork}">
+			<input id="stuAndWorkId" name="stuAndWorkId" type="hidden" th:field="*{stuWorkId}"/>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">学生学号：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="studentId" id="studentId" th:field="*{studentId}" readonly>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">学生姓名：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="studentName" id="studentName" th:field="*{studentName}" readonly>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">实习企业：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="company" id="company" th:field="*{company}" readonly>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">实习地点：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="site" id="site" th:field="*{site}" readonly>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">开始时间：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="begining" id="begining" th:field="*{begining}" readonly>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">结束时间：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="ending" id="ending" th:field="*{ending}" readonly>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">实习内容：</label>
+				<div class="col-sm-8">
+					<textarea class="form-control" type="text" name="content" id="content" th:field="*{content}" readonly></textarea>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">置换课程：</label>
+				<div class="col-sm-8">
+					<input class="form-control" th:each="course : ${courses}"  th:value="${course}" readonly>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">周报成绩：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="pacificScore" id="pacificScore" th:field="*{pacificScore}" readonly>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">总结成绩：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="examScore" id="examScore" th:field="*{examScore}" readonly>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">总评成绩：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="score" id="score" th:field="*{score}" readonly>
+				</div>
+			</div>
+		</form>
+	</div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: ztree-js" />
+	<th:block th:include="include :: datetimepicker-js" />
+	<script type="text/javascript">
+	     $(function() {
+
+		});
+
+		function submitHandler() {
+			//获取窗口索引
+			var index = parent.layer.getFrameIndex(window.name);
+			parent.layer.close(index);
+	    }
+	</script>
+</body>
+</html>

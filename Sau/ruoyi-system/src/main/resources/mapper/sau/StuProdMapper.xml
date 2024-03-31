@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.sau.mapper.StuProdMapper">
+    <update id="agree" parameterType="long">
+        update sau_student_production_msg
+        set audit_state = 2
+        where stu_prod_id in
+        <foreach collection="array" item="stuProdId" open="(" separator="," close=")">
+            #{stuProdId}
+        </foreach>
+    </update>
+
+    <update id="reject" parameterType="long">
+        update sau_student_production_msg
+        set audit_state = 3
+        where stu_prod_id in
+        <foreach collection="array" item="stuProdId" open="(" separator="," close=")">
+            #{stuProdId}
+        </foreach>
+    </update>
+
+    <update id="grade">
+        update sau_student_production_msg
+        set
+        pacific_score = #{pacificScore},
+        exam_score = #{examScore},
+        score = #{score}
+        where state = 1 and stu_prod_id = #{stuProdId}
+    </update>
+
+    <insert id="addProdApply" parameterType="long">
+        insert into sau_student_production_msg(
+          student_id,
+          production_id,
+          audit_state,
+          state
+        )
+        values(
+          #{userId},
+          #{productionId},
+          1,
+          1
+        )
+    </insert>
+
+    <update id="deleteById" parameterType="long">
+        update sau_student_production_msg
+        set state = 2
+        where stu_prod_id = #{stuProdId}
+    </update>
+
+    <select id="selectProdApply" resultType="map">
+        select
+        a.stu_prod_id as "stuProdId",
+        case a.audit_state when 1 then '待审核' when 2 then '通过' when 3 then '不通过' END as "auditState",
+        b.production_id as "productionId",
+        b.production_name as "productionName",
+        b.production_require as "productionRequire",
+        b.production_begin as "productionBegin",
+        b.production_end as "productionEnd",
+        b.production_over as "productionOver",
+        b.production_company as "productionCompany",
+        b.production_intro as "productionIntro",
+        c.student_id as "studentId",
+        c.student_name as "studentName"
+        from sau_student_production_msg a
+        left join sau_production_info_msg b on a.production_id = b.production_id
+        left join sau_student_info_msg c on a.student_id = c.student_id
+        <where>
+            a.state = 1 and b.state = 1 and c.state = 1
+            <if test="studentId != null and studentId != 0">
+                and c.student_id = #{studentId}
+            </if>
+            <if test="studentName != null and studentName != ''">
+                and c.student_name like concat('%',#{studentName},'%')
+            </if>
+            <if test="productionId != null and productionId != 0">
+                and b.production_id = #{productionId}
+            </if>
+            <if test="auditState != null and auditState != 0">
+                and a.audit_state = #{auditState}
+            </if>
+        </where>
+    </select>
+
+
+
+    <select id="selectByStuProdId" parameterType="long" resultType="map">
+        select
+        stu_prod_id as "stuProdId",
+        student_id as "studentId",
+        production_id as "productionId",
+        pacific_score as "pacificScore",
+        exam_score as "examScore",
+        score as "score",
+        audit_state as "auditState"
+        from sau_student_production_msg
+        where state = 1 and stu_prod_id = #{stuProdId}
+    </select>
+
+    <select id="selectApplyBystudentId" resultType="map" parameterType="long">
+        select
+        b.production_id as "productionId",
+        b.production_name as "productionName",
+        b.production_require as "productionRequire",
+        b.production_begin as "productionBegin",
+        b.production_end as "productionEnd",
+        b.production_over as "productionOver",
+        b.production_company as "productionCompany",
+        b.production_intro as "productionIntro",
+        b.production_weeks as "productionWeeks",
+        b.pacific as "pacific",
+        b.exam as "exam",
+        a.stu_prod_id as "stuProdId",
+        a.pacific_score as "pacificScore",
+        a.exam_score as "examScore",
+        a.score as "score",
+        case a.audit_state when 1 then '待审核' when 2 then '通过' when 3 then '未通过' End as "auditState"
+        from sau_student_production_msg a
+        left join sau_production_info_msg b on a.production_id = b.production_id
+        <where>
+            a.state = 1 and b.state = 1 and a.student_id = #{stuId}
+            <if test="productionId != null and productionId != 0">
+                and b.production_id = #{productionId}
+            </if>
+            <if test="productionName != null and productionName != ''">
+                and b.production_name like concat('%',#{productionName},'%')
+            </if>
+            <if test="productionCompany != null and productionCompany != ''">
+                and b.production_company like concat('%',#{productionCompany},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="selectAllGrade" resultType="map">
+        select
+        b.production_id as "productionId",
+        b.production_name as "productionName",
+        b.production_begin as "productionBegin",
+        b.production_end as "productionEnd",
+        b.production_company as "productionCompany",
+        b.production_intro as "productionIntro",
+        b.production_weeks as "productionWeeks",
+        a.stu_prod_id as "stuProdId",
+        a.pacific_score as "pacificScore",
+        a.exam_score as "examScore",
+        a.score as "score",
+        c.student_id as "studentId",
+        c.student_name as "studentName"
+        from sau_student_production_msg a
+        left join sau_production_info_msg b on a.production_id = b.production_id
+        left join sau_student_info_msg c on c.student_id = a.student_id
+        <where>
+            a.state = 1 and b.state = 1 and c.state = 1 and a.audit_state = 2
+            <if test="stuProdId != null and stuProdId != 0">
+                and a.stu_prod_id = #{stuProdId}
+            </if>
+            <if test="productionName != null and productionName != ''">
+                and b.production_name like concat('%',#{productionName},'%')
+            </if>
+            <if test="studentName != null and studentName != ''">
+                and c.student_name like concat('%',#{studentName},'%')
+            </if>
+            <if test="productionCompany != null and productionCompany != ''">
+                and b.production_company like concat('%',#{productionCompany},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="selectMyGrade" parameterType="long" resultType="map">
+        select
+        b.production_id as "productionId",
+        b.production_name as "productionName",
+        b.production_begin as "productionBegin",
+        b.production_end as "productionEnd",
+        b.production_company as "productionCompany",
+        b.production_intro as "productionIntro",
+        b.production_weeks as "productionWeeks",
+        a.stu_prod_id as "stuProdId",
+        a.pacific_score as "pacificScore",
+        a.exam_score as "examScore",
+        a.score as "score"
+        from sau_student_production_msg a
+        left join sau_production_info_msg b on a.production_id = b.production_id
+        <where>
+            a.state = 1 and b.state = 1 and a.student_id = #{stuId} and a.audit_state = 2
+            <if test="productionId != null and productionId != 0">
+                and b.production_id = #{productionId}
+            </if>
+            <if test="productionName != null and productionName != ''">
+                and b.production_name like concat('%',#{productionName},'%')
+            </if>
+            <if test="productionCompany != null and productionCompany != ''">
+                and b.production_company like concat('%',#{productionCompany},'%')
+            </if>
+        </where>
+    </select>
+
+</mapper>

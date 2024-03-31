@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.sau.mapper.WorkMapper">
+
+    <select id="selectWork" resultType="map">
+        select
+        work_id as "workId",
+        work_name as "workName",
+        work_require as "workRequire",
+        work_over as "workOver",
+        work_weeks as "workWeeks",
+        work_weekly as "workWeekly",
+        work_begin as "workBegin",
+        work_end as "workEnd",
+        pacific as "pacific",
+        exam as "exam"
+        from sau_work_info_msg
+        <where>
+            state = 1
+            <if test="workId != null and workId != 0">
+                and work_id = #{workId}
+            </if>
+            <if test="workName != null and workName != ''">
+                and work_name = #{workName}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectWorkById" resultType="com.ruoyi.sau.domain.Work" parameterType="long">
+        select
+        work_id as "workId",
+        work_name as "workName",
+        work_require as "workRequire",
+        work_over as "workOver",
+        work_weeks as "workWeeks",
+        work_weekly as "workWeekly",
+        work_begin as "workBegin",
+        work_end as "workEnd",
+        pacific as "pacific",
+        exam as "exam"
+        from sau_work_info_msg
+        where state = 1 and work_id = #{workId}
+    </select>
+
+    <select id="selectWorkByStuWorkId" resultType="com.ruoyi.sau.domain.Work" parameterType="long">
+        select
+        b.work_id as "workId",
+        b.work_name as "workName",
+        b.work_require as "workRequire",
+        b.work_over as "workOver",
+        b.work_weeks as "workWeeks",
+        b.work_weekly as "workWeekly",
+        b.work_begin as "workBegin",
+        b.work_end as "workEnd",
+        b.pacific as "pacific",
+        b.exam as "exam"
+        from sau_student_work_msg a
+        left join sau_work_info_msg b on a.work_id = b.work_id
+        where a.state = 1 and b.state = 1 and a.stu_work_id = #{stuWorkId}
+    </select>
+
+    <insert id="addWork" parameterType="com.ruoyi.sau.domain.Work">
+        insert into sau_work_info_msg
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="workName != null and workName !=''">
+                work_name,
+            </if>
+            <if test="workRequire != null and workRequire !=''">
+                work_require,
+            </if>
+            <if test="workOver != null and workOver !=''">
+                work_over,
+            </if>
+            <if test="workWeeks != null and workWeeks !=0">
+                work_weeks,
+            </if>
+            <if test="workWeekly != null and workWeekly !=''">
+                work_weekly,
+            </if>
+            <if test="workBegin != null and workBegin !=''">
+                work_begin,
+            </if>
+            <if test="workEnd != null and workEnd !=''">
+                work_end,
+            </if>
+            <if test="pacific != null and pacific !=''">
+                pacific,
+            </if>
+            <if test="exam != null and exam !=''">
+                exam,
+            </if>
+            state
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="workName != null and workName !=''">
+                #{workName},
+            </if>
+            <if test="workRequire != null and workRequire !=''">
+                #{workRequire},
+            </if>
+            <if test="workOver != null and workOver !=''">
+                #{workOver},
+            </if>
+            <if test="workWeeks != null and workWeeks !=0">
+                #{workWeeks},
+            </if>
+            <if test="workWeekly != null and workWeekly !=''">
+                #{workWeekly},
+            </if>
+            <if test="workBegin != null and workBegin !=''">
+                #{workBegin},
+            </if>
+            <if test="workEnd != null and workEnd !=''">
+                #{workEnd},
+            </if>
+            <if test="pacific != null and pacific !=''">
+                #{pacific},
+            </if>
+            <if test="exam != null and exam !=''">
+                #{exam},
+            </if>
+            1
+        </trim>
+    </insert>
+
+    <update id="updateWork" parameterType="map">
+        update sau_work_info_msg
+        <set>
+            <if test="workName != null and workName !=''">
+                work_name = #{workName},
+            </if>
+            <if test="workRequire != null and workRequire !=''">
+                work_require = #{workRequire},
+            </if>
+            <if test="workOver != null and workOver !=''">
+                work_over = #{workOver},
+            </if>
+            <if test="workWeeks != null and workWeeks !=0">
+                work_weeks = #{workWeeks},
+            </if>
+            <if test="workWeekly != null and workWeekly !=''">
+                work_weekly = #{workWeekly},
+            </if>
+            <if test="workBegin != null and workBegin !=''">
+                work_begin = #{workBegin},
+            </if>
+            <if test="workEnd != null and workEnd !=''">
+                work_end = #{workEnd},
+            </if>
+            <if test="pacific != null and pacific !=''">
+                pacific = #{pacific},
+            </if>
+            <if test="exam != null and exam !=''">
+                exam = #{exam},
+            </if>
+        </set>
+        where state = 1 and work_id = #{workId}
+    </update>
+
+    <select id="deleteWork" parameterType="long">
+        update sau_work_info_msg
+        set state = 2
+        where work_id in
+        <foreach collection="array" item="workId" open="(" separator="," close=")">
+            #{workId}
+        </foreach>
+    </select>
+
+    <update id="deleteWork2" parameterType="long">
+        update sau_work_weekly_msg a,sau_student_work_msg b,sau_work_info_msg c
+        set a.state = 2
+        where a.state = 1 and b.state = 1 and c.state = 1 and
+        a.stu_work_id = b.stu_work_id and b.work_id = c.work_id
+        and c.work_id in
+        <foreach collection="array" item="workId" open="(" separator="," close=")">
+            #{workId}
+        </foreach>
+    </update>
+
+    <update id="deleteWork3" parameterType="long">
+        update sau_student_work_msg a,sau_work_info_msg b
+        set a.state = 2
+        where a.state = 1 and b.state = 1 and
+        a.work_id = b.work_id
+        and b.work_id in
+        <foreach collection="array" item="workId" open="(" separator="," close=")">
+            #{workId}
+        </foreach>
+    </update>
+
+    <select id="getWorkByStuId" parameterType="long" resultType="long">
+        select work_id
+        from sau_student_work_msg
+        where student_id = #{userId} and state = 1 and audit_state != 3
+    </select>
+</mapper>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.mapper.CourseMapper">
+    <insert id="addCourse" parameterType="com.ruoyi.project.domain.Course">
+      insert into sau_course_info_msg
+      <trim  prefix="(" suffix=")" suffixOverrides="," >
+          <if test="courseName != null and courseName != ''">
+              course_name,
+          </if>
+          <if test="teacherId != null and teacherId != 0">
+              teacher_id,
+          </if>
+          <if test="teacherName != null and teacherName != ''">
+              teacher_name,
+          </if>
+          <if test="courseTime != null and courseTime != 0">
+              course_time,
+          </if>
+          <if test="coursePoint != null and coursePoint != 0">
+              course_point,
+          </if>
+          <if test="pacific != null and pacific != 0">
+              pacific,
+          </if>
+          <if test="exam != null and exam != 0">
+              exam,
+          </if>
+          state
+      </trim>
+      <trim prefix="values (" suffix=")" suffixOverrides=",">
+          <if test="courseName != null and courseName != ''">
+              #{courseName},
+          </if>
+          <if test="teacherId != null and teacherId != 0">
+              #{teacherId},
+          </if>
+          <if test="teacherName != null and teacherName != ''">
+              #{teacherName},
+          </if>
+          <if test="courseTime != null and courseTime != 0">
+              #{courseTime},
+          </if>
+          <if test="coursePoint != null and coursePoint != 0">
+              #{coursePoint},
+          </if>
+          <if test="pacific != null and pacific != 0">
+              #{pacific},
+          </if>
+          <if test="exam != null and exam != 0">
+              #{exam},
+          </if>
+          1
+      </trim>
+    </insert>
+
+    <update id="deleteCourse" parameterType="long">
+        update sau_course_info_msg
+        set state = 0
+        where course_id in
+        <foreach collection="array" item="courseId" open="(" separator="," close=")">
+            #{courseId}
+        </foreach>
+    </update>
+
+    <update id="deleteCourse2" parameterType="long">
+        update sau_student_course_msg
+        set state = 0
+        where course_id in
+        <foreach collection="array" item="courseId" open="(" separator="," close=")">
+            #{courseId}
+        </foreach>
+    </update>
+
+    <update id="updateCourse" parameterType="com.ruoyi.project.domain.Course">
+        update sau_course_info_msg
+        <set>
+            <if test="courseName != null and courseName != ''">
+                course_name = #{courseName},
+            </if>
+            <if test="teacherId != null and teacherId != 0">
+                teacher_id = #{teacherId},
+            </if>
+            <if test="teacherName != null and teacherName != ''">
+                teacher_name = #{teacherName},
+            </if>
+            <if test="courseTime != null and courseTime != 0">
+                course_time = #{courseTime},
+            </if>
+            <if test="coursePoint != null and coursePoint != 0">
+                course_point = #{coursePoint},
+            </if>
+            <if test="pacific != null and pacific != 0">
+                pacific = #{pacific},
+            </if>
+            <if test="exam != null and exam != 0">
+                exam = #{exam},
+            </if>
+        </set>
+        where course_id = #{courseId}
+    </update>
+
+    <select id="selectCourse" resultType="map">
+        select
+        course_id as "courseId",
+        course_name as "courseName",
+        teacher_id as "teacherId",
+        teacher_name as "teacherName",
+        course_time as "courseTime",
+        course_point as "coursePoint",
+        pacific as "pacific",
+        exam as "exam"
+        from sau_course_info_msg
+        <where>
+            state = 1
+            <if test="courseId != null and courseId != 0">
+                and course_id = #{courseId}
+            </if>
+            <if test="courseName != null and courseName != ''">
+                and course_name like concat('%',#{courseName},'%')
+            </if>
+            <if test="teacherName != null and teacherName != ''">
+                and teacher_name like concat('%',#{teacherName},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="selectCourseById" resultType="com.ruoyi.project.domain.Course" parameterType="long">
+        select
+        course_id as "courseId",
+        course_name as "courseName",
+        teacher_id as "teacherId",
+        teacher_name as "teacherName",
+        course_time as "courseTime",
+        course_point as "coursePoint",
+        pacific as "pacific",
+        exam as "exam"
+        from sau_course_info_msg
+        where state = 1 and course_id = #{courseId}
+    </select>
+
+</mapper>

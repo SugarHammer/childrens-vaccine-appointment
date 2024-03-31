@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('成绩查询')" />
+</head>
+<body class="gray-bg">
+	<div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="role-form">
+					<div class="select-list">
+						<ul>
+							<li>
+								课程号：<input  style="width:140px" type="text" name="courseId"/>
+							</li>
+							<li>
+								课程名称：<input style="width:140px" type="text" name="courseName"/>
+							</li>
+							<li>
+								任课教师姓名：<input style="width:140px" type="text" name="teacherName"/>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+							    <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+		
+			<div class="btn-group-sm" id="toolbar" role="group">
+
+	        </div>
+	        
+	        <div class="col-sm-12 select-table table-striped">
+			    <table id="bootstrap-table"></table>
+			</div>
+		</div>
+	</div>
+	<th:block th:include="include :: footer" />
+	<script th:inline="javascript">
+		var prefix = ctx + "project/grade";
+
+		$(function() {
+		    var options = {
+		        url: prefix + "/selectCourseByStuId",
+		        sortName: "b.curriculaId",
+		        modalName: "成绩",
+		        columns: [
+					{
+						field: 'curriculaId',
+						title: '选课编号'
+					},
+					{
+						field: 'courseId',
+						title: '课程号'
+					},
+					{
+						field: 'courseName',
+						title: '课程名称'
+					},
+					{
+		            	field: 'teacherId',
+		            	title: '任课教师号'
+		        	},
+					{
+						field: 'teacherName',
+						title: '任课教师姓名'
+					},
+					{
+						field: 'courseTime',
+						title: '学时'
+					},
+					{
+						field: 'coursePoint',
+						title: '学分'
+					},
+					{
+						field: 'pacificScore',
+						title: '平时成绩'
+					},
+					{
+						field: 'examScore',
+						title: '考试成绩'
+					},
+					{
+						field: 'score',
+						title: '总成绩',
+						sortable: true
+					}
+				]
+		    };
+		    $.table.init(options);
+		});
+
+	</script>
+</body>
+</html>

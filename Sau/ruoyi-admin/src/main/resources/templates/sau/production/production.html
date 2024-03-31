@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('生产实习列表')" />
+</head>
+<body class="gray-bg">
+	<div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="role-form">
+					<div class="select-list">
+						<ul>
+							<li>
+								编号：<input type="text" name="productionId"/>
+							</li>
+							<li>
+								名称：<input type="text" name="productionName"/>
+							</li>
+							<li>
+								实习单位：<input type="text" name="productionCompany"/>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+							    <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+		
+			<div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="system:production:add">
+	                <i class="fa fa-plus"></i> 发布
+	            </a>
+	            <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="system:production:edit">
+		            <i class="fa fa-edit"></i> 修改
+		        </a>
+				<a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="system:production:remove">
+		            <i class="fa fa-remove"></i> 删除
+		        </a>
+		        <!--<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="system:role:export">-->
+		            <!--<i class="fa fa-download"></i> 导出-->
+		        <!--</a>-->
+	        </div>
+	        
+	        <div class="col-sm-12 select-table table-striped">
+			    <table id="bootstrap-table"></table>
+			</div>
+		</div>
+	</div>
+	<th:block th:include="include :: footer" />
+	<script th:inline="javascript">
+		var editFlag = [[${@permission.hasPermi('system:production:edit')}]];
+		var removeFlag = [[${@permission.hasPermi('system:production:remove')}]];
+		var prefix = ctx + "sau/production";
+		
+
+		$(function() {
+		    var options = {
+		        url: prefix + "/selectProduction",
+		        createUrl: prefix + "/add",
+		        updateUrl: prefix + "/edit/{id}",
+		        removeUrl: prefix + "/deleteProduction",
+		        sortName: "productionId",
+		        modalName: "疫苗信息",
+		        columns: [{
+		            checkbox: true
+		        },
+					{
+						field: 'productionId',
+						title: '编号'
+					},
+					{
+						field: 'productionName',
+						title: '名称'
+					},
+					{
+		            	field: 'productionRequire',
+						cellStyle: formatTableUnit,
+						formatter: paramsMatter,
+		            	title: '申请要求'
+		        	},
+					{
+						field: 'productionBegin',
+						title: '开始时间'
+					},
+					{
+						field: 'productionEnd',
+						title: '结束时间'
+					},
+					{
+						field: 'productionOver',
+						title: '申请截至时间'
+					},
+					{
+						field: 'productionCompany',
+						cellStyle: formatTableUnit,
+						formatter: paramsMatter,
+						title: '单位名称'
+					},
+					{
+						field: 'productionIntro',
+						cellStyle: formatTableUnit,
+						formatter: paramsMatter,
+						title: '单位简介'
+					},
+					// {
+					// 	field: 'productionWeeks',
+					// 	title: '周报数量'
+					// },
+					{
+						field: 'productionWeekly',
+						cellStyle: formatTableUnit,
+						formatter: paramsMatter,
+						title: '备注'
+					},
+					// {
+					// 	field: 'pacific',
+					// 	title: '周报占比(%)'
+					// },
+					// {
+					// 	field: 'exam',
+					// 	title: '总结占比(%)'
+					// },
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		                var actions = [];
+		                actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.productionId+ '\')"><i class="fa fa-edit"></i>编辑</a> ');
+		                actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.productionId + '\')"><i class="fa fa-remove"></i>删除</a> ');
+		                return actions.join('');
+		            }
+		        }]
+		    };
+		    $.table.init(options);
+		});
+
+		function paramsMatter(value, row, index) {
+			var span = document.createElement("span");
+			span.setAttribute("title", (typeof(value) == "undefined") ? "-" : value);
+			span.innerHTML = (typeof(value) == "undefined") ? "-" : value;
+			return span.outerHTML;
+		}
+		//td宽度以及内容超过宽度隐藏
+		function formatTableUnit(value, row, index) {
+			return {
+				css: {
+					"white-space": "nowrap",
+					"text-overflow": "ellipsis",
+					"overflow": "hidden",
+					"max-width": "60px"
+				}
+			}
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.mapper.StudentMapper">
+    <insert id="addStudent" parameterType="com.ruoyi.project.domain.Student">
+      insert into sau_student_info_msg
+      <trim  prefix="(" suffix=")" suffixOverrides="," >
+          <if test="studentId != null and studentId != 0">
+              student_id,
+          </if>
+          <if test="studentName != null and studentName != ''">
+              student_name,
+          </if>
+          <if test="studentSex != null">
+              student_sex,
+          </if>
+          <if test="studentBirthday != null">
+              student_birthday,
+          </if>
+          <if test="studentGrade != null">
+              student_grade,
+          </if>
+          <if test="departmentId != null and departmentId != 0">
+              department_id,
+          </if>
+          state
+      </trim>
+      <trim prefix="values (" suffix=")" suffixOverrides=",">
+          <if test="studentId != null and studentId != 0">
+              #{studentId},
+          </if>
+          <if test="studentName != null and studentName !=''">
+              #{studentName},
+          </if>
+          <if test="studentSex != null">
+              #{studentSex},
+          </if>
+          <if test="studentBirthday != null">
+              #{studentBirthday},
+          </if>
+          <if test="studentGrade != null">
+              #{studentGrade},
+          </if>
+          <if test="departmentId != null and departmentId != 0">
+              #{departmentId},
+          </if>
+          1
+      </trim>
+    </insert>
+
+    <update id="deleteStudent" parameterType="long">
+        update sau_student_info_msg
+        set state = 0
+        where student_id in
+        <foreach collection="array" item="studentId" open="(" separator="," close=")">
+            #{studentId}
+        </foreach>
+    </update>
+
+    <update id="deleteStudent2" parameterType="long">
+        update sau_student_course_msg
+        set state = 0
+        where student_id in
+        <foreach collection="array" item="studentId" open="(" separator="," close=")">
+            #{studentId}
+        </foreach>
+    </update>
+
+    <update id="updateStudent" parameterType="com.ruoyi.project.domain.Student">
+        update sau_student_info_msg
+        <set>
+            <if test="studentName != null and studentName != ''">
+                student_name = #{studentName},
+            </if>
+            <if test="studentSex != null">
+                student_sex = #{studentSex},
+            </if>
+            <if test="studentBirthday != null">
+                student_birthday = #{studentBirthday},
+            </if>
+            <if test="studentGrade != null">
+                student_grade = #{studentGrade},
+            </if>
+            <if test="departmentId != null and departmentId != 0">
+                department_id = #{departmentId},
+            </if>
+        </set>
+        where student_id = #{studentId}
+    </update>
+
+    <select id="selectStudent" resultType="map">
+        select
+        student_id as "studentId",
+        student_name as "studentName",
+        case student_sex when 0 then '男' when 1 then '女' when 2 then '未知' End as "studentSex",
+        student_birthday as "studentBirthday",
+        student_grade as "studentGrade",
+        department_id as "departmentId"
+        from sau_student_info_msg
+        <where>
+            state = 1
+            <if test="studentId != null and studentId != 0">
+                and student_id = #{studentId}
+            </if>
+            <if test="studentName != null and studentName != ''">
+                and student_name like concat('%',#{studentName},'%')
+            </if>
+            <if test="departmentId != null and departmentId != 0">
+                and department_id = #{departmentId}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectStudentById" resultType="com.ruoyi.project.domain.Student" parameterType="long">
+        select
+        student_id as "studentId",
+        student_name as "studentName",
+        student_sex as "studentSex",
+        student_birthday as "studentBirthday",
+        student_grade as "studentGrade",
+        department_id as "departmentId"
+        from sau_student_info_msg
+        where state = 1 and student_id = #{studentId}
+    </select>
+
+    <select id="selectStudentList" resultType="com.ruoyi.project.domain.Student">
+        select
+        student_id as "studentId",
+        student_name as "studentName",
+        case student_sex when 0 then '男' when 1 then '女' when 2 then '未知' End as "studentSex",
+        student_birthday as "studentBirthday",
+        student_grade as "studentGrade",
+        department_id as "departmentId"
+        from sau_student_info_msg
+        <where>
+            state = 1
+            <if test="studentId != null and studentId != 0">
+                and student_id = #{studentId}
+            </if>
+            <if test="studentName != null and studentName != ''">
+                and student_name like concat('%',#{studentName},'%')
+            </if>
+            <if test="departmentId != null and departmentId != 0">
+                and department_id = #{departmentId}
+            </if>
+        </where>
+    </select>
+
+</mapper>

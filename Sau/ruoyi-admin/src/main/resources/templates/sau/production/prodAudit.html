@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('生产实习审核')" />
+</head>
+<body class="gray-bg">
+<div class="container-div">
+	<div class="row">
+		<div class="col-sm-12 search-collapse">
+			<form id="role-form">
+				<div class="select-list">
+					<ul>
+						<li>
+							编号：<input type="text" style="width:140px" name="productionId"/>
+						</li>
+						<li>
+							用户编号：<input type="text" style="width:140px" name="studentId"/>
+						</li>
+						<li>
+							用户姓名：<input type="text" style="width:140px" name="studentName"/>
+						</li>
+						<li>
+							审核状态：<select name="auditState" id="auditState" style="width:140px">
+								<option value="0">无</option>
+								<option value="1">待审核</option>
+								<option value="2">通过</option>
+								<option value="3">不通过</option>
+							</select>
+						</li>
+						<li>
+							<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+							<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+						</li>
+					</ul>
+				</div>
+			</form>
+		</div>
+
+		<div class="btn-group-sm" id="toolbar" role="group">
+			<a class="btn btn-success multiple disabled" onclick="agreeAll()" shiro:hasPermission="system:prodaudit:agree">
+				<i class="fa fa-plus"></i> 同意
+			</a>
+			<a class="btn btn-danger multiple disabled" onclick="rejectAll()" shiro:hasPermission="system:prodaudit:reject">
+				<i class="fa fa-remove"></i> 拒绝
+			</a>
+		</div>
+
+		<div class="col-sm-12 select-table table-striped">
+			<table id="bootstrap-table"></table>
+		</div>
+	</div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+	var agreeFlag = [[${@permission.hasPermi('system:prodaudit:agree')}]];
+	var rejectFlag = [[${@permission.hasPermi('system:prodaudit:reject')}]];
+	var prefix = ctx + "sau/prodaudit";
+
+
+	$(function() {
+		var options = {
+			url: prefix + "/selectProdApply",
+			agreeUrl: prefix + "/agree",
+			rejectUrl: prefix + "/reject",
+			sortName: "stuProdId",
+			modalName: "疫苗信息",
+			columns: [
+				{
+					checkbox: true
+				},
+				{
+					field: 'stuProdId',
+					title: '编号'
+				},
+				{
+					field: 'productionName',
+					title: '名称'
+				},
+				{
+					field: 'productionRequire',
+					cellStyle: formatTableUnit,
+					formatter: paramsMatter,
+					title: '申请要求'
+				},
+				{
+					field: 'productionBegin',
+					title: '开始时间'
+				},
+				{
+					field: 'productionEnd',
+					title: '结束时间'
+				},
+				{
+					field: 'productionCompany',
+					cellStyle: formatTableUnit,
+					formatter: paramsMatter,
+					title: '疫苗单位名称'
+				},
+				{
+					field: 'productionIntro',
+					cellStyle: formatTableUnit,
+					formatter: paramsMatter,
+					title: '疫苗单位简介'
+				},
+				{
+					field: 'studentId',
+					title: '用户编号'
+				},
+				{
+					field: 'studentName',
+					title: '用户姓名'
+				},
+				{
+					field: 'auditState',
+					title: '审核状态'
+				},
+				{
+					title: '操作',
+					align: 'center',
+					formatter: function(value, row, index) {
+						var actions = [];
+						actions.push('<a class="btn btn-success btn-xs ' + agreeFlag + '" href="javascript:void(0)" onclick="agree(\'' + row.stuProdId+ '\')"><i class="fa fa-plus"></i>同意</a> ');
+						actions.push('<a class="btn btn-danger btn-xs ' + rejectFlag + '" href="javascript:void(0)" onclick="reject(\'' + row.stuProdId+ '\')"><i class="fa fa-remove"></i>拒绝</a> ');
+						return actions.join('');
+					}
+				}]
+		};
+		$.table.init(options);
+	});
+
+	// 同意生产实习
+	function agree(id) {
+		table.set();
+		$.modal.confirm("确定同意该用户" + table.options.modalName + "申请吗？", function() {
+			var url = $.common.isEmpty(id) ? table.options.agreeUrl : table.options.agreeUrl.replace("{id}", id);
+			if(table.options.type == table_type.bootstrapTreeTable) {
+				$.operate.get(url);
+			} else {
+				var data = { "ids": id };
+				$.operate.submit(url, "post", "json", data);
+			}
+		});
+	}
+
+	// 批量同意生产实习
+	function agreeAll() {
+		table.set();
+		var rows = $.common.isEmpty(table.options.uniqueId) ? $.table.selectFirstColumns() : $.table.selectColumns(table.options.uniqueId);
+		if (rows.length == 0) {
+			$.modal.alertWarning("请至少选择一条记录");
+			return;
+		}
+		$.modal.confirm("确认要同意" + rows.length + "名学生申请吗?", function() {
+			var url = table.options.agreeUrl;
+			var data = { "ids": rows.join() };
+			$.operate.submit(url, "post", "json", data);
+		});
+	}
+
+	// 拒绝生产实习
+	function reject(id) {
+		table.set();
+		$.modal.confirm("确定拒绝该用户" + table.options.modalName + "申请吗？", function() {
+			var url = $.common.isEmpty(id) ? table.options.rejectUrl : table.options.rejectUrl.replace("{id}", id);
+			if(table.options.type == table_type.bootstrapTreeTable) {
+				$.operate.get(url);
+			} else {
+				var data = { "ids": id };
+				$.operate.submit(url, "post", "json", data);
+			}
+		});
+	}
+
+	// 批量拒绝生产实习
+	function rejectAll() {
+		table.set();
+		var rows = $.common.isEmpty(table.options.uniqueId) ? $.table.selectFirstColumns() : $.table.selectColumns(table.options.uniqueId);
+		if (rows.length == 0) {
+			$.modal.alertWarning("请至少选择一条记录");
+			return;
+		}
+		$.modal.confirm("确认要拒绝" + rows.length + "名学生申请吗?", function() {
+			var url = table.options.rejectUrl;
+			var data = { "ids": rows.join() };
+			$.operate.submit(url, "post", "json", data);
+		});
+	}
+
+	function paramsMatter(value, row, index) {
+		var span = document.createElement("span");
+		span.setAttribute("title", (typeof(value) == "undefined") ? "-" : value);
+		span.innerHTML = (typeof(value) == "undefined") ? "-" : value;
+		return span.outerHTML;
+	}
+	//td宽度以及内容超过宽度隐藏
+	function formatTableUnit(value, row, index) {
+		return {
+			css: {
+				"white-space": "nowrap",
+				"text-overflow": "ellipsis",
+				"overflow": "hidden",
+				"max-width": "60px"
+			}
+		}
+	}
+
+</script>
+</body>
+</html>

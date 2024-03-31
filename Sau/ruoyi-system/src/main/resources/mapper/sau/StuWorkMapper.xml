@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.sau.mapper.StuWorkMapper">
+    <insert id="addWorkApply">
+        insert into sau_student_work_msg(
+          stu_work_id,
+          student_id,
+          work_id,
+          company,
+          site,
+          content,
+          begining,
+          ending,
+          audit_state,
+          state
+        )
+        values(
+          #{stuWorkId},
+          #{userId},
+          #{workId},
+          #{company},
+          #{site},
+          #{content},
+          #{begining},
+          #{ending},
+          1,
+          1
+        )
+    </insert>
+
+    <select id="getId" resultType="long">
+		select auto_increment
+		from information_schema.`TABLES`
+ 		where table_name='sau_student_work_msg' and TABLE_SCHEMA='sau'
+	</select>
+
+    <select id="selectApplyBystudentId" resultType="map">
+        select
+        b.work_id as "workId",
+        b.work_name as "workName",
+        b.work_require as "workRequire",
+        b.work_over as "workOver",
+        b.work_weeks as "workWeeks",
+        b.work_weekly as "workWeekly",
+        b.pacific as "pacific",
+        b.exam as "exam",
+        a.stu_work_id as "stuWorkId",
+        a.company as "company",
+        a.site as "site",
+        a.begining as "begining",
+        a.ending as "ending",
+        a.content as "content",
+        a.pacific_score as "pacificScore",
+        a.exam_score as "examScore",
+        a.score as "score",
+        case a.audit_state when 1 then '待审核' when 2 then '通过' when 3 then '未通过' End as "auditState"
+        from sau_student_work_msg a
+        left join sau_work_info_msg b on a.work_id = b.work_id
+        <where>
+            a.state = 1 and b.state = 1 and a.student_id = #{stuId}
+            <if test="stuWorkId != null and stuWorkId != 0">
+                and b.stu_work_id = #{stuWorkId}
+            </if>
+            <if test="workName != null and workName != ''">
+                and b.work_name like concat('%',#{workName},'%')
+            </if>
+            <if test="company != null and company != ''">
+                and a.company like concat('%',#{company},'%')
+            </if>
+        </where>
+    </select>
+
+    <update id="deleteById">
+        update sau_student_work_msg
+        set state = 2
+        where stu_work_id = #{stuWorkId}
+    </update>
+
+    <select id="selectWorkApply" resultType="map">
+        select
+        a.stu_work_id as "stuWorkId",
+        a.company as "company",
+        a.site as "site",
+        a.begining as "begining",
+        a.ending as "ending",
+        a.content as "content",
+        case a.audit_state when 1 then '待审核' when 2 then '通过' when 3 then '不通过' END as "auditState",
+        b.work_id as "workId",
+        b.work_name as "workName",
+        b.work_require as "workRequire",
+        b.work_over as "workOver",
+        c.student_id as "studentId",
+        c.student_name as "studentName"
+        from sau_student_work_msg a
+        left join sau_work_info_msg b on a.work_id = b.work_id
+        left join sau_student_info_msg c on a.student_id = c.student_id
+        <where>
+            a.state = 1 and b.state = 1 and c.state = 1
+            <if test="studentId != null and studentId != 0">
+                and c.student_id = #{studentId}
+            </if>
+            <if test="studentName != null and studentName != ''">
+                and c.student_name like concat('%',#{studentName},'%')
+            </if>
+            <if test="workId != null and workId != 0">
+                and b.work_id = #{workId}
+            </if>
+            <if test="auditState != null and auditState != 0">
+                and a.audit_state = #{auditState}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectByStuWorkId" parameterType="long" resultType="map">
+        select
+        stu_work_id as "stuWorkId",
+        student_id as "studentId",
+        work_id as "workId",
+        pacific_score as "pacificScore",
+        exam_score as "examScore",
+        score as "score",
+        audit_state as "auditState"
+        from sau_student_work_msg
+        where state = 1 and stu_work_id = #{stuWorkId}
+    </select>
+
+    <select id="selectStuAndWorkByStuWorkId" parameterType="long" resultType="com.ruoyi.sau.domain.StuAndWork">
+        select
+        a.stu_work_id as "stuWorkId",
+        a.student_id as "studentId",
+        a.work_id as "workId",
+        a.company as "company",
+        a.site as "site",
+        a.begining as "begining",
+        a.ending as "ending",
+        a.content as "content",
+        a.pacific_score as "pacificScore",
+        a.exam_score as "examScore",
+        a.score as "score",
+        a.audit_state as "auditState",
+        b.student_name as "studentName"
+        from sau_student_work_msg a
+        left join sau_student_info_msg b on a.student_id = b.student_id
+        where a.state = 1 and b.state = 1 and a.stu_work_id = #{stuWorkId}
+    </select>
+
+    <update id="reject" parameterType="long">
+        update sau_student_work_msg
+        set audit_state = 3
+        where stu_work_id in
+        <foreach collection="array" item="stuWorkId" open="(" separator="," close=")">
+            #{stuWorkId}
+        </foreach>
+    </update>
+
+    <update id="agree" parameterType="long">
+        update sau_student_work_msg
+        set audit_state = 2
+        where stu_work_id in
+        <foreach collection="array" item="stuWorkId" open="(" separator="," close=")">
+            #{stuWorkId}
+        </foreach>
+    </update>
+
+    <update id="grade">
+        update sau_student_work_msg
+        set
+        pacific_score = #{pacificScore},
+        exam_score = #{examScore},
+        score = #{score}
+        where state = 1 and stu_work_id = #{stuWorkId}
+    </update>
+
+    <select id="selectMyGrade" parameterType="long" resultType="map">
+        select
+        b.work_id as "workId",
+        b.work_name as "workName",
+        b.work_weeks as "workWeeks",
+        a.stu_work_id as "stuWorkId",
+        a.company as "company",
+        a.begining as "begining",
+        a.ending as "ending",
+        a.pacific_score as "pacificScore",
+        a.exam_score as "examScore",
+        a.score as "score"
+        from sau_student_work_msg a
+        left join sau_work_info_msg b on a.work_id = b.work_id
+        <where>
+            a.state = 1 and b.state = 1 and a.student_id = #{stuId} and a.audit_state = 2
+            <if test="workId != null and workId != 0">
+                and b.work_id = #{workId}
+            </if>
+            <if test="workName != null and workName != ''">
+                and b.work_name like concat('%',#{workName},'%')
+            </if>
+            <if test="company != null and company != ''">
+                and a.company like concat('%',#{company},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="selectAllGrade" resultType="map">
+        select
+        b.work_id as "workId",
+        b.work_name as "workName",
+        b.work_weeks as "workWeeks",
+        a.stu_work_id as "stuWorkId",
+        a.company as "company",
+        a.begining as "begining",
+        a.ending as "ending",
+        a.pacific_score as "pacificScore",
+        a.exam_score as "examScore",
+        a.score as "score",
+        c.student_id as "studentId",
+        c.student_name as "studentName"
+        from sau_student_work_msg a
+        left join sau_work_info_msg b on a.work_id = b.work_id
+        left join sau_student_info_msg c on c.student_id = a.student_id
+        <where>
+            a.state = 1 and b.state = 1 and c.state = 1 and a.audit_state = 2
+            <if test="stuWorkId != null and stuWorkId != 0">
+                and a.stu_work_id = #{stuWorkId}
+            </if>
+            <if test="workName != null and workName != ''">
+                and b.work_name like concat('%',#{workName},'%')
+            </if>
+            <if test="studentName != null and studentName != ''">
+                and c.student_name like concat('%',#{studentName},'%')
+            </if>
+            <if test="company != null and company != ''">
+                and a.company like concat('%',#{company},'%')
+            </if>
+        </where>
+    </select>
+</mapper>
